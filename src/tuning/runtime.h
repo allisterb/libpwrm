@@ -20,38 +20,31 @@
  * or just google for it.
  *
  * Authors:
- *	Srinivas Pandruvada <Srinivas.Pandruvada@linux.intel.com>
+ *	Arjan van de Ven <arjan@linux.intel.com>
  */
-#ifndef _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
-#define _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
+#ifndef _INCLUDE_GUARD_RUNTIME_TUNE_H
+#define _INCLUDE_GUARD_RUNTIME_TUNE_H
 
 #include <vector>
-#include <string>
+#include <limits.h>
 
+#include "tunable.h"
 using namespace std;
 
-#include <sys/time.h>
-#include "i915-gpu.h"
-#include "../cpu/rapl/rapl_interface.h"
-
-class gpu_rapl_device: public i915gpu {
-
-	c_rapl_interface rapl;
-	time_t		last_time;
-	double		last_energy;
-	double 		consumed_power;
-	bool		device_valid;
-
+class runtime_tunable : public tunable {
+	char runtime_path[PATH_MAX];
 public:
-	gpu_rapl_device(i915gpu *parent);
-	virtual const char * class_name(void) { return "GPU core";};
-	virtual const char * device_name(void) { return "GPU core";};
-	bool device_present() { return device_valid;}
-	virtual double power_usage(struct result_bundle *result, struct parameter_bundle *bundle);
-	virtual void start_measurement(void);
-	virtual void end_measurement(void);
+	runtime_tunable(const char *runtime_path, const char *bus, const char *dev, const char *port);
+
+	virtual int good_bad(void);
+
+	virtual void toggle(void);
+
+	virtual const char *toggle_script(void);
 
 };
+
+extern void add_runtime_tunables(const char *bus);
 
 
 #endif

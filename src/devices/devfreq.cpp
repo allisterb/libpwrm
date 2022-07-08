@@ -33,10 +33,7 @@
 
 #include "device.h"
 #include "devfreq.h"
-#include "../display.h"
 #include "../cpu/cpu.h"
-#include "../report/report.h"
-#include "../report/report-maker.h"
 
 static bool is_enabled = true;
 static DIR *dir = NULL;
@@ -254,64 +251,9 @@ void create_all_devfreq_devices(void)
 	process_directory(p.c_str(), fn);
 }
 
-void initialize_devfreq(void)
-{
-	if (is_enabled)
-		create_tab("Device Freq stats", _("Device Freq stats"));
-}
 
-void display_devfreq_devices(void)
-{
-	unsigned int i, j;
-	WINDOW *win;
-	char fline[1024];
-	char buf[128];
 
-	win = get_ncurses_win("Device Freq stats");
-        if (!win)
-                return;
 
-        wclear(win);
-        wmove(win, 2,0);
-
-	if (!is_enabled) {
-		wprintw(win, _(" Devfreq is not enabled"));
-		return;
-	}
-
-	if (!all_devfreq.size()) {
-		wprintw(win, _(" No devfreq devices available"));
-		return;
-	}
-
-	for (i=0; i<all_devfreq.size(); i++) {
-
-		class devfreq *df = all_devfreq[i];
-		wprintw(win, "\n%s\n", df->device_name());
-
-		for(j=0; j < df->dstates.size(); j++) {
-			memset(fline, 0, sizeof(fline));
-			strcpy(fline, "\t");
-			df->fill_freq_name(j, buf);
-			strcat(fline, buf);
-			df->fill_freq_utilization(j, buf);
-			strcat(fline, buf);
-			strcat(fline, "\n");
-			wprintw(win, "%s", fline);
-		}
-		wprintw(win, "\n");
-	}
-}
-
-void report_devfreq_devices(void)
-{
-	if (!is_enabled) {
-		return;
-	}
-
-/* todo: adapt to new report format */
-
-}
 
 void clear_all_devfreq()
 {

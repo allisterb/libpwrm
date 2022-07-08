@@ -20,38 +20,34 @@
  * or just google for it.
  *
  * Authors:
- *	Srinivas Pandruvada <Srinivas.Pandruvada@linux.intel.com>
+ *	Arjan van de Ven <arjan@linux.intel.com>
  */
-#ifndef _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
-#define _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
+#ifndef _INCLUDE_GUARD_SYSFS_TUNE_H
+#define _INCLUDE_GUARD_SYSFS_TUNE_H
 
 #include <vector>
-#include <string>
+#include <limits.h>
+
+#include "tunable.h"
 
 using namespace std;
 
-#include <sys/time.h>
-#include "i915-gpu.h"
-#include "../cpu/rapl/rapl_interface.h"
-
-class gpu_rapl_device: public i915gpu {
-
-	c_rapl_interface rapl;
-	time_t		last_time;
-	double		last_energy;
-	double 		consumed_power;
-	bool		device_valid;
-
+class sysfs_tunable : public tunable {
+	char sysfs_path[PATH_MAX];
+	char target_value[4096];
+	char bad_value[4096];
 public:
-	gpu_rapl_device(i915gpu *parent);
-	virtual const char * class_name(void) { return "GPU core";};
-	virtual const char * device_name(void) { return "GPU core";};
-	bool device_present() { return device_valid;}
-	virtual double power_usage(struct result_bundle *result, struct parameter_bundle *bundle);
-	virtual void start_measurement(void);
-	virtual void end_measurement(void);
+	sysfs_tunable(const char *str, const char *sysfs_path, const char *target_content);
+
+	virtual int good_bad(void);
+
+	virtual void toggle(void);
+
+	virtual const char *toggle_script(void);
 
 };
 
+extern void add_sysfs_tunable(const char *str, const char *_sysfs_path, const char *_target_content);
+extern void add_sata_tunables(void);
 
 #endif

@@ -34,11 +34,11 @@
 using namespace std;
 
 #include "device.h"
-#include "report/report.h"
-#include "report/report-maker.h"
+//#include "report/report.h"
+//#include "report/report-maker.h"
 #include "ahci.h"
 #include "../parameters/parameters.h"
-#include "report/report-data-html.h"
+// #include "report/report-data-html.h"
 #include <string.h>
 
 vector <class ahci *> links;
@@ -353,54 +353,6 @@ double ahci::power_usage(struct result_bundle *result, struct parameter_bundle *
 	return power;
 }
 
-void ahci_create_device_stats_table(void)
-{
-	unsigned int i;
-	int cols=0;
-	int rows=0;
-
-	/* div attr css_class and css_id */
-	tag_attr div_attr;
-	init_div(&div_attr, "clear_block", "ahci");
-
-	/* Set Title attributes */
-	tag_attr title_attr;
-	init_title_attr(&title_attr);
-
-	/* Add section */
-	report.add_div(&div_attr);
-
-	if (links.size() == 0) {
-		report.add_title(&title_attr, __("AHCI ALPM Residency Statistics - Not supported on this macine"));
-		report.end_div();
-		return;
-	}
-
-	/* Set Table attributes, rows, and cols */
-	table_attributes std_table_css;
-	cols=5;
-	rows=links.size()+1;
-	init_std_side_table_attr(&std_table_css, rows, cols);
-
-
-
-	/* Set array of data in row Major order */
-	string *ahci_data = new string[cols * rows];
-	ahci_data[0]=__("Link");
-	ahci_data[1]=__("Active");
-	ahci_data[2]=__("Partial");
-	ahci_data[3]=__("Slumber");
-	ahci_data[4]=__("Devslp");
-
-	/* traverse list of all devices and put their residency in the table */
-	for (i = 0; i < links.size(); i++){
-		links[i]->report_device_stats(ahci_data, i);
-	}
-	report.add_title(&title_attr, __("AHCI ALPM Residency Statistics"));
-	report.add_table(ahci_data, &std_table_css);
-	report.end_div();
-	delete [] ahci_data;
-}
 
 void ahci::report_device_stats(string *ahci_data, int idx)
 {

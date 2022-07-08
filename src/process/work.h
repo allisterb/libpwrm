@@ -20,38 +20,38 @@
  * or just google for it.
  *
  * Authors:
- *	Srinivas Pandruvada <Srinivas.Pandruvada@linux.intel.com>
+ *	Arjan van de Ven <arjan@linux.intel.com>
  */
-#ifndef _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
-#define _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
+#ifndef _INCLUDE_GUARD_WORK_H
+#define _INCLUDE_GUARD_WORK_H
 
-#include <vector>
-#include <string>
+#include <stdint.h>
 
-using namespace std;
+#include "powerconsumer.h"
 
-#include <sys/time.h>
-#include "i915-gpu.h"
-#include "../cpu/rapl/rapl_interface.h"
-
-class gpu_rapl_device: public i915gpu {
-
-	c_rapl_interface rapl;
-	time_t		last_time;
-	double		last_energy;
-	double 		consumed_power;
-	bool		device_valid;
-
+class work : public power_consumer {
+	char desc[256];
 public:
-	gpu_rapl_device(i915gpu *parent);
-	virtual const char * class_name(void) { return "GPU core";};
-	virtual const char * device_name(void) { return "GPU core";};
-	bool device_present() { return device_valid;}
-	virtual double power_usage(struct result_bundle *result, struct parameter_bundle *bundle);
-	virtual void start_measurement(void);
-	virtual void end_measurement(void);
+	char		handler[32];
+	int		raw_count;
+
+	work(unsigned long work_func);
+
+	void fire(uint64_t time, uint64_t work_struct);
+	uint64_t done(uint64_t time, uint64_t work_struct);
+
+	virtual const char * description(void);
+	virtual const char * name(void) { return "work"; };
+	virtual const char * type(void) { return "kWork"; };
+	virtual double usage_summary(void);
+	virtual const char * usage_units_summary(void);
 
 };
 
+
+extern void all_work_to_all_power(void);
+extern class work * find_create_work(uint64_t func);
+
+extern void clear_work(void);
 
 #endif

@@ -20,38 +20,14 @@
  * or just google for it.
  *
  * Authors:
- *	Srinivas Pandruvada <Srinivas.Pandruvada@linux.intel.com>
+ *	Arjan van de Ven <arjan@linux.intel.com>
  */
-#ifndef _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
-#define _INCLUDE_GUARD_GPU_RAPL_DEVICE_H
+#ifndef _INCLUDE_GUARD_TUNING_H
+#define _INCLUDE_GUARD_TUNING_H
 
-#include <vector>
-#include <string>
-
-using namespace std;
-
-#include <sys/time.h>
-#include "i915-gpu.h"
-#include "../cpu/rapl/rapl_interface.h"
-
-class gpu_rapl_device: public i915gpu {
-
-	c_rapl_interface rapl;
-	time_t		last_time;
-	double		last_energy;
-	double 		consumed_power;
-	bool		device_valid;
-
-public:
-	gpu_rapl_device(i915gpu *parent);
-	virtual const char * class_name(void) { return "GPU core";};
-	virtual const char * device_name(void) { return "GPU core";};
-	bool device_present() { return device_valid;}
-	virtual double power_usage(struct result_bundle *result, struct parameter_bundle *bundle);
-	virtual void start_measurement(void);
-	virtual void end_measurement(void);
-
-};
-
-
+extern void initialize_tuning(void);
+extern void tuning_update_display(void);
+extern void report_show_tunables(void);
+extern void clear_tuning(void);
+extern void auto_toggle_tuning(void);
 #endif

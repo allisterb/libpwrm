@@ -11,6 +11,3 @@ set(perf_sources
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})
 
-add_library(libpwrm_perf OBJECT
-            ${perf_sources}
-            ${perf_headers})

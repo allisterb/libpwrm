@@ -14,7 +14,3 @@ set(measurement_sources
   CACHE INTERNAL "")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})
-
-add_library(libpwrm_measurement OBJECT
-            ${measurement_sources}
-            ${measurement_headers})

@@ -12,6 +12,6 @@ set(traceevent_sources
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})
 
-add_library(libpwrm_traceevent OBJECT
+add_library(traceevent STATIC
             ${traceevent_sources}
             ${traceevent_headers})

@@ -30,9 +30,13 @@
 
 #include "devlist.h"
 
+#include "spdlog/spdlog.h"
+
 #define DEBUGFS_MAGIC          0x64626720
 
 #define NR_OPEN_DEF 1024 * 1024
+
+using namespace spdlog;
 
 extern "C" {
 	static volatile bool end_thread;
@@ -226,7 +230,7 @@ int main(int argc, char **argv)
 	powertop_init(0);
 	//initialize_devfreq();
 	//initialize_tuning();
-	
-	one_measurement(10, 1, nullptr);
+	info("Welcome to spdlog!");
+	//one_measurement(10, 1, nullptr);
     return 0;
 }

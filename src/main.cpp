@@ -34,13 +34,6 @@
 
 #define NR_OPEN_DEF 1024 * 1024
 
-int main(int argc, char **argv)
-{
-	setlocale (LC_ALL, "");
-    return 0;
-}
-
-
 extern "C" {
 	static volatile bool end_thread;
 	void* measure_background_thread(void *arg)
@@ -52,6 +45,110 @@ extern "C" {
 		}
 		return 0;
 	}
+}
+
+static void checkroot() {
+	int uid;
+	uid = getuid();
+
+	if (uid != 0) {
+		printf("PowerTOP  must be run with root privileges.\n");
+		printf("exiting...\n");
+		exit(EXIT_FAILURE);
+	}
+
+}
+
+static int get_nr_open(void) {
+	int nr_open = NR_OPEN_DEF;
+	ifstream file;
+
+	file.open("/proc/sys/fs/nr_open", ios::in);
+	if (file) {
+		file >> nr_open;
+		file.close();
+	}
+	return nr_open;
+}
+
+static void powertop_init(int auto_tune)
+{
+	static char initialized = 0;
+	int ret;
+	struct statfs st_fs;
+	struct rlimit rlmt;
+
+	if (initialized)
+		return;
+
+	//checkroot();
+
+	rlmt.rlim_cur = rlmt.rlim_max = get_nr_open();
+	setrlimit (RLIMIT_NOFILE, &rlmt);
+
+	if (system("/sbin/modprobe cpufreq_stats > /dev/null 2>&1"))
+		fprintf(stderr, _("modprobe cpufreq_stats failed\n"));
+#if defined(__i386__) || defined(__x86_64__)
+	if (system("/sbin/modprobe msr > /dev/null 2>&1"))
+		fprintf(stderr, _("modprobe msr failed\n"));
+#endif
+	statfs("/sys/kernel/debug", &st_fs);
+
+	if (st_fs.f_type != (long) DEBUGFS_MAGIC) {
+		if (access("/bin/mount", X_OK) == 0) {
+			ret = system("/bin/mount -t debugfs debugfs /sys/kernel/debug > /dev/null 2>&1");
+		} else {
+			ret = system("mount -t debugfs debugfs /sys/kernel/debug > /dev/null 2>&1");
+		}
+		if (ret != 0) {
+			if (!auto_tune) {
+				fprintf(stderr, _("Failed to mount debugfs!\n"));
+				fprintf(stderr, _("exiting...\n"));
+				exit(EXIT_FAILURE);
+			} else {
+				fprintf(stderr, _("Failed to mount debugfs!\n"));
+				fprintf(stderr, _("Should still be able to auto tune...\n"));
+			}
+		}
+	}
+
+	srand(time(NULL));
+
+	if (access("/var/cache/", W_OK) == 0)
+		mkdir("/var/cache/powertop", 0600);
+	else
+		mkdir("/data/local/powertop", 0600);
+
+	load_results("saved_results.powertop");
+	load_parameters("saved_parameters.powertop");
+
+	enumerate_cpus();
+	create_all_devices();
+	create_all_devfreq_devices();
+	detect_power_meters();
+
+	register_parameter("base power", 100, 0.5);
+	register_parameter("cpu-wakeups", 39.5);
+	register_parameter("cpu-consumption", 1.56);
+	register_parameter("gpu-operations", 0.5576);
+	register_parameter("disk-operations-hard", 0.2);
+	register_parameter("disk-operations", 0.0);
+	register_parameter("xwakes", 0.1);
+
+        load_parameters("saved_parameters.powertop");
+
+	initialized = 1;
+}
+
+void clean_shutdown()
+{
+	close_results();
+	clean_open_devices();
+	clear_all_devices();
+	clear_all_devfreq();
+	clear_all_cpus();
+
+	return;
 }
 
 void one_measurement(int seconds, int sample_interval, char *workload)
@@ -122,4 +219,15 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	//ahci_create_device_stats_table();
 	store_results(measurement_time);
 	end_cpu_data();
+}
+
+int main(int argc, char **argv)
+{
+	setlocale (LC_ALL, "");
+	powertop_init(0);
+	//initialize_devfreq();
+	//initialize_tuning();
+	
+	one_measurement(10, 1, nullptr);
+    return 0;
 }

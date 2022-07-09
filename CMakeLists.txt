@@ -31,6 +31,12 @@ add_library (spdlog STATIC ${SPDLOG_SRC})
 target_include_directories(spdlog PRIVATE ext/spdlog/include)
 target_compile_definitions(spdlog PRIVATE SPDLOG_COMPILED_LIB=1)
 
+set (FIGLET_SRC 
+    ext/embedFiglet/src/Figlet.cc
+    ext/embedFiglet/src/Figlet_Font_standard.cc
+    ext/embedFiglet/src/Figlet_Font_small.cc
+)
+
 add_subdirectory(src/traceevent)
 add_subdirectory(src/perf)
 add_subdirectory(src/measurement)
@@ -78,12 +84,14 @@ target_link_libraries(pwrm PRIVATE Threads::Threads)
 add_executable(pwrm_cli 
     src/main.cpp 
     ${pwrm_headers}
+    ${FIGLET_SRC}
 )
 
 target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector)
 
 target_include_directories (pwrm_cli PUBLIC 
-    ext/spdlog/include    
+    ext/spdlog/include
+    ext/embedFiglet/src    
     src
 )
 

@@ -31,6 +31,7 @@
 #include "devlist.h"
 
 #include "spdlog/spdlog.h"
+#include "Figlet.hh"
 
 #define DEBUGFS_MAGIC          0x64626720
 
@@ -227,6 +228,7 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 int main(int argc, char **argv)
 {
 	setlocale (LC_ALL, "");
+	Figlet::small.print("energyd");
 	powertop_init(0);
 	//initialize_devfreq();
 	//initialize_tuning();

@@ -12,19 +12,32 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
 
-include(cmake/pciutils.cmake)
+include(src/cmake/pciutils.cmake)
 
 if(NOT ${PCIUTILS_FOUND})
 message(FATAL_ERROR "pciutils library not found.")
 endif()
 
-add_subdirectory(traceevent)
-add_subdirectory(perf)
-add_subdirectory(measurement)
-add_subdirectory(parameters)
-add_subdirectory(process)
-add_subdirectory(devices)
-add_subdirectory(cpu)
+set (SPDLOG_SRC 
+    ext/spdlog/src/async.cpp
+    ext/spdlog/src/cfg.cpp
+    ext/spdlog/src/color_sinks.cpp
+    ext/spdlog/src/file_sinks.cpp
+    ext/spdlog/src/fmt.cpp
+    ext/spdlog/src/spdlog.cpp
+    ext/spdlog/src/stdout_sinks.cpp
+)
+add_library (spdlog STATIC ${SPDLOG_SRC})
+target_include_directories(spdlog PRIVATE ext/spdlog/include)
+target_compile_definitions(spdlog PRIVATE SPDLOG_COMPILED_LIB=1)
+
+add_subdirectory(src/traceevent)
+add_subdirectory(src/perf)
+add_subdirectory(src/measurement)
+add_subdirectory(src/parameters)
+add_subdirectory(src/process)
+add_subdirectory(src/devices)
+add_subdirectory(src/cpu)
 
 set(pwrm_headers      
     ${traceevent_headers}
@@ -34,8 +47,8 @@ set(pwrm_headers
     ${process_headers}
     ${devices_headers}
     ${cpu_headers}
-    devlist.h
-    lib.h
+    src/devlist.h
+    src/lib.h
 )
 
 add_library(pwrm STATIC
@@ -46,20 +59,32 @@ add_library(pwrm STATIC
     ${process_sources}
     ${devices_sources}
     ${cpu_sources}
-    devlist.cpp
-    lib.cpp
+    src/devlist.cpp
+    src/lib.cpp
 )
 
 target_compile_options(pwrm PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector -pthread)
 
-target_include_directories (pwrm PUBLIC ${PCIUTILS_INCLUDE_DIR})
+target_include_directories (pwrm PUBLIC 
+    ${PCIUTILS_INCLUDE_DIR} 
+    ext/spdlog/include 
+    src
+)
 
 target_link_libraries(pwrm PUBLIC traceevent ${PCIUTILS_LIBRARIES})
 
 target_link_libraries(pwrm PRIVATE Threads::Threads)
 
-add_executable(pwrm_cli main.cpp ${pwrm_headers})
+add_executable(pwrm_cli 
+    src/main.cpp 
+    ${pwrm_headers}
+)
 
 target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector)
 
-target_link_libraries(pwrm_cli PUBLIC pwrm)
+target_include_directories (pwrm_cli PUBLIC 
+    ext/spdlog/include    
+    src
+)
+
+target_link_libraries(pwrm_cli PUBLIC pwrm spdlog)

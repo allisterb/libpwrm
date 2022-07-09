@@ -124,8 +124,8 @@ static void powertop_init(int auto_tune)
 	else
 		mkdir("/data/local/powertop", 0600);
 
-	load_results("saved_results.powertop");
-	load_parameters("saved_parameters.powertop");
+	//load_results("saved_results.powertop");
+	//load_parameters("saved_parameters.powertop");
 
 	enumerate_cpus();
 	create_all_devices();
@@ -138,7 +138,7 @@ static void powertop_init(int auto_tune)
 	register_parameter("gpu-operations", 0.5576);
 	register_parameter("disk-operations-hard", 0.2);
 	register_parameter("disk-operations", 0.0);
-	//register_parameter("xwakes", 0.1);
+	register_parameter("xwakes", 0.1);
 	//load_parameters("saved_parameters.powertop");
 
 	initialized = 1;
@@ -228,11 +228,11 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 int main(int argc, char **argv)
 {
 	setlocale (LC_ALL, "");
-	Figlet::small.print("energyd");
+	Figlet::small.print("pwrmd");
 	powertop_init(0);
 	//initialize_devfreq();
 	//initialize_tuning();
 	info("Welcome to spdlog!");
-	//one_measurement(10, 1, nullptr);
+	one_measurement(10, 1, nullptr);
     return 0;
 }

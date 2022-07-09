@@ -142,16 +142,20 @@ void sysfs_power_meters_callback(const char *d_name)
 
 	class sysfs_power_meter *meter;
 	meter = new(std::nothrow) class sysfs_power_meter(d_name);
-	if (meter)
+	if (meter) {
 		power_meters.push_back(meter);
+		info("Added power meter %s.", d_name);
+	}
 }
 
 void acpi_power_meters_callback(const char *d_name)
 {
 	class acpi_power_meter *meter;
 	meter = new(std::nothrow) class acpi_power_meter(d_name);
-	if (meter)
+	if (meter) {
 		power_meters.push_back(meter);
+		info("Added power meter %s.", d_name);
+	}
 }
 
 void sysfs_opal_sensors_callback(const char *d_name)
@@ -165,8 +169,10 @@ void sysfs_opal_sensors_callback(const char *d_name)
 		return;
 
 	meter = new(std::nothrow) class opal_sensors_power_meter(d_name);
-	if (meter)
+	if (meter) {
 		power_meters.push_back(meter);
+		info("Added power meter %s.", d_name);
+	}
 }
 
 void detect_power_meters(void)

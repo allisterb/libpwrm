@@ -7,5 +7,3 @@ set(parameters_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/parameters.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/persistent.cpp
   CACHE INTERNAL "")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})

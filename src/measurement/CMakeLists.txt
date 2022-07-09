@@ -13,5 +13,3 @@ set(measurement_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/opal-sensors.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/sysfs.cpp
   CACHE INTERNAL "")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})

@@ -19,5 +19,3 @@ set(devices_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/runtime_pm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/usb.cpp
   CACHE INTERNAL "")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})

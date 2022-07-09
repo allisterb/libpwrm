@@ -16,5 +16,3 @@ ${CMAKE_CURRENT_SOURCE_DIR}/processdevice.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/timer.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/work.cpp
   CACHE INTERNAL "")
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})

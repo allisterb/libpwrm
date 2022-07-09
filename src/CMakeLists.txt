@@ -62,6 +62,4 @@ add_executable(pwrm_cli main.cpp ${pwrm_headers})
 
 target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector)
 
-target_include_directories (pwrm_cli PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
 target_link_libraries(pwrm_cli PUBLIC pwrm)

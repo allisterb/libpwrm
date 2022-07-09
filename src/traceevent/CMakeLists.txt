@@ -10,8 +10,6 @@ set(traceevent_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/trace-seq.c
   CACHE INTERNAL "")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${libpwrm_includes})
-
 add_library(traceevent SHARED
             ${traceevent_sources}
             ${traceevent_headers})

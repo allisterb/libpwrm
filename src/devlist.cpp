@@ -293,57 +293,5 @@ static bool devlist_sort(struct devuser * i, struct devuser * j)
 	return (strcmp(i->device, j->device)< 0);
 }
 
-void report_show_open_devices(void)
-{
-	vector<struct devuser *> *target;
-	unsigned int i;
-	char prev[128], proc[128];
-	int idx, cols, rows;
-
-	prev[0] = 0;
-	if (phase == 1)
-		target = &one;
-	else
-		target = &two;
-
-	if (target->size() == 0)
-		return;
 
 
-	/* Set Table attributes, rows, and cols */
-	table_attributes std_table_css;
-	cols = 2;
-	idx = cols;
-	rows= target->size() + 1;
-	init_std_table_attr(&std_table_css, rows, cols);
-
-	/* Set Title attributes */
-	tag_attr title_attr;
-	init_title_attr(&title_attr);
-
-	/* Set array of data in row Major order */
-	string *process_data = new string[cols * rows];
-
-	sort(target->begin(), target->end(), devlist_sort);
-	process_data[0]=__("Process");
-	process_data[1]=__("Device");
-
-	for (i = 0; i < target->size(); i++) {
-		proc[0] = 0;
-		if (strcmp(prev, (*target)[i]->comm) != 0)
-			snprintf(proc, sizeof(proc), "%s", (*target)[i]->comm);
-
-		process_data[idx]=string(proc);
-		idx+=1;
-		process_data[idx]=string((*target)[i]->device);
-		idx+=1;
-		snprintf(prev, sizeof(prev), "%s", (*target)[i]->comm);
-	}
-
-	/* Report Output */
-	/* No div attribute here inherits from device power report */
-	report.add_title(&title_attr, __("Process Device Activity"));
-	report.add_table(process_data, &std_table_css);
-	delete [] process_data;
-	report.end_div();
-}

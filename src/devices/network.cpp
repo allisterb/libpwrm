@@ -323,14 +323,14 @@ void network::end_measurement(void)
 	if (start_pkts > end_pkts)
 		end_pkts = start_pkts;
 
-	u_powerunsave = 100 - 100 * get_wifi_power_saving(name);
+	//u_powerunsave = 100 - 100 * get_wifi_power_saving(name);
 
 	report_utilization(rindex_link_100, u_100);
 	report_utilization(rindex_link_1000, u_1000);
 	report_utilization(rindex_link_high, u_high);
 	report_utilization(rindex_up, (start_up+end_up) / 2.0);
 	report_utilization(rindex_pkts, (end_pkts - start_pkts)/(duration + 0.001));
-	report_utilization(rindex_powerunsave, u_powerunsave);
+	//report_utilization(rindex_powerunsave, u_powerunsave);
 }
 
 

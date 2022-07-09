@@ -29,7 +29,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <dirent.h>
-#include "lib.h"
+#include "../../lib.h"
 #include "rapl_interface.h"
 
 #ifdef DEBUG

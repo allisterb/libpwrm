@@ -10,6 +10,7 @@ set(measurement_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/acpi.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/extech.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/measurement.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/opal-sensors.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/sysfs.cpp
   CACHE INTERNAL "")
 

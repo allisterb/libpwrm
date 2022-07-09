@@ -39,7 +39,6 @@
 
 #include "../lib.h"
 #include "../parameters/parameters.h"
-#include "../display.h"
 
 static int intel_cpu_models[] = {
 	0x1A,	/* Core i7, Xeon 5500 series */
@@ -140,7 +139,7 @@ static uint64_t get_msr(int cpu, uint64_t offset)
 
 	retval = read_msr(cpu, offset, &msr);
 	if (retval < 0) {
-		reset_display();
+		//reset_display();
 		fprintf(stderr, _("read_msr cpu%d 0x%llx : "), cpu, (unsigned long long)offset);
 		fprintf(stderr, "%s\n", strerror(errno));
 		exit(-2);

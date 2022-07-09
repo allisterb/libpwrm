@@ -38,7 +38,6 @@
 
 #include "../lib.h"
 #include "../parameters/parameters.h"
-#include "../display.h"
 
 void i965_core::measurement_start(void)
 {

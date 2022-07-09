@@ -81,7 +81,7 @@ static void powertop_init(int auto_tune)
 	if (initialized)
 		return;
 
-	//checkroot();
+	checkroot();
 
 	rlmt.rlim_cur = rlmt.rlim_max = get_nr_open();
 	setrlimit (RLIMIT_NOFILE, &rlmt);
@@ -133,9 +133,8 @@ static void powertop_init(int auto_tune)
 	register_parameter("gpu-operations", 0.5576);
 	register_parameter("disk-operations-hard", 0.2);
 	register_parameter("disk-operations", 0.0);
-	register_parameter("xwakes", 0.1);
-
-        load_parameters("saved_parameters.powertop");
+	//register_parameter("xwakes", 0.1);
+	//load_parameters("saved_parameters.powertop");
 
 	initialized = 1;
 }

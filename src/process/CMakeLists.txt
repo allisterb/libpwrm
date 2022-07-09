@@ -10,6 +10,7 @@ set(process_headers
 set(process_sources
 ${CMAKE_CURRENT_SOURCE_DIR}/interrupt.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/powerconsumer.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/do_process.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/process.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/processdevice.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/timer.cpp

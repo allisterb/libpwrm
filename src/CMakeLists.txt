@@ -12,6 +12,12 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
 
+include(cmake/pciutils.cmake)
+
+if(NOT ${PCIUTILS_FOUND})
+message(FATAL_ERROR "pciutils library not found.")
+endif()
+
 add_subdirectory(traceevent)
 add_subdirectory(perf)
 add_subdirectory(measurement)
@@ -46,7 +52,9 @@ add_library(pwrm STATIC
 
 target_compile_options(pwrm PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector -pthread)
 
-target_link_libraries(pwrm PUBLIC traceevent)
+target_include_directories (pwrm PUBLIC ${PCIUTILS_INCLUDE_DIR})
+
+target_link_libraries(pwrm PUBLIC traceevent ${PCIUTILS_LIBRARIES})
 
 target_link_libraries(pwrm PRIVATE Threads::Threads)
 

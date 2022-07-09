@@ -97,29 +97,29 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	process_process_data();
 
 	/* output stats */
-	process_update_display();
-	report_summary();
-	w_display_cpu_cstates();
-	w_display_cpu_pstates();
+	//process_update_display();
+	//report_summary();
+	//w_display_cpu_cstates();
+	//w_display_cpu_pstates();
 	//if (reporttype != REPORT_OFF) {
 	//	report_display_cpu_cstates();
 	//	report_display_cpu_pstates();
 	//}
-	report_process_update_display();
-	tuning_update_display();
+	//report_process_update_display();
+	//tuning_update_display();
 	//wakeup_update_display();
 	end_process_data();
 
 	global_power();
 	compute_bundle();
 
-	show_report_devices();
-	report_show_open_devices();
+	//show_report_devices();
+	//report_show_open_devices();
 
-	report_devices();
-	display_devfreq_devices();
-	report_devfreq_devices();
-	ahci_create_device_stats_table();
+	//report_devices();
+	//display_devfreq_devices();
+	//report_devfreq_devices();
+	//ahci_create_device_stats_table();
 	store_results(measurement_time);
 	end_cpu_data();
 }

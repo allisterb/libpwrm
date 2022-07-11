@@ -31,12 +31,15 @@
 #include "devlist.h"
 
 #include "Figlet.hh"
+#include "tclap/CmdLine.h"
+#include "tclap/UnlabeledValueArg.h"
 
 #define DEBUGFS_MAGIC          0x64626720
 
 #define NR_OPEN_DEF 1024 * 1024
 
 using namespace spdlog;
+using namespace TCLAP;
 
 int debug_learning = 0;
 

@@ -91,7 +91,8 @@ target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-p
 
 target_include_directories (pwrm_cli PUBLIC 
     ext/spdlog/include
-    ext/embedFiglet/src    
+    ext/embedFiglet/src
+    ext/tclap-1.2.3/include    
     src
 )
 

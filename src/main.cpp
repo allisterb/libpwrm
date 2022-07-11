@@ -30,7 +30,6 @@
 
 #include "devlist.h"
 
-#include "spdlog/spdlog.h"
 #include "Figlet.hh"
 
 #define DEBUGFS_MAGIC          0x64626720
@@ -86,7 +85,7 @@ static void powertop_init(int auto_tune)
 	if (initialized)
 		return;
 
-	checkroot();
+	//checkroot();
 
 	rlmt.rlim_cur = rlmt.rlim_max = get_nr_open();
 	setrlimit (RLIMIT_NOFILE, &rlmt);
@@ -233,6 +232,11 @@ int main(int argc, char **argv)
 	//initialize_devfreq();
 	//initialize_tuning();
 	info("Welcome to spdlog!");
-	one_measurement(10, 1, nullptr);
+	for (int i = 0; i <all_devices.size(); i++) {
+		info("CPU {}", all_devices[i]->human_name());
+	}
+	//info(abstract_cpu::)
+
+	//one_measurement(10, 1, nullptr);
     return 0;
 }

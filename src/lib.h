@@ -56,7 +56,11 @@ extern const char *kernel_function(uint64_t address);
 
 #include <ctime>
 #include <string>
+
+#include "spdlog/spdlog.h"
+
 using namespace std;
+using namespace spdlog;
 
 extern void write_sysfs(const string &filename, const string &value);
 extern int read_sysfs(const string &filename, bool *ok = NULL);

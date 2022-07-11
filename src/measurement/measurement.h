@@ -26,10 +26,8 @@
 #define __INCLUDE_GUARD_MEASUREMENT_H
 
 #include <vector>
-#include "spdlog/spdlog.h"
 
 using namespace std;
-using namespace spdlog; 
 
 class power_meter {
 	bool discharging = false;

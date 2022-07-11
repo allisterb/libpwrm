@@ -57,7 +57,7 @@ set(pwrm_headers
     src/lib.h
 )
 
-add_library(pwrm STATIC
+add_library(pwrm SHARED
     ${pwrm_headers}
     ${measurement_sources}
     ${parameters_sources}

@@ -38,6 +38,8 @@
 
 using namespace spdlog;
 
+int debug_learning = 0;
+
 extern "C" {
 	static volatile bool end_thread;
 	void* measure_background_thread(void *arg)

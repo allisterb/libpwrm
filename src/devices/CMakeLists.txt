@@ -7,6 +7,7 @@ set(devices_headers
   ${CMAKE_CURRENT_SOURCE_DIR}/network.h
   ${CMAKE_CURRENT_SOURCE_DIR}/runtime_pm.h
   ${CMAKE_CURRENT_SOURCE_DIR}/usb.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/i915-gpu.h
   CACHE INTERNAL "")
 
 set(devices_sources
@@ -18,4 +19,5 @@ set(devices_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/network.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/runtime_pm.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/usb.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/i915-gpu.cpp
   CACHE INTERNAL "")

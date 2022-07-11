@@ -229,10 +229,29 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	end_cpu_data();
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
 	Figlet::small.print("pwrmd");
+	try
+	{
+		CmdLine cmd("libpwrm is a embeddable library for measuring power usage by devices and processes..", ' ', "0.1", true);
+		UnlabeledValueArg<string> simArg("simulator","Name of simulator to run. Defaults to LJ (Lennard-Jones) atoms in cubic box.", false, "lj", "string", cmd);
+		cmd.parse(argc, argv);
+	}
+	catch (ArgException &e) 
+   { 
+    	error("Error parsing option {0}: {1}.", e.argId(), e.error());
+    	return 1;
+   }
+   catch (std::exception &e) 
+   { 
+   		error("Runtime error parsing options: {0}", e.what());
+    	return 1; 
+   }
+	
+
+	
 	powertop_init(0);
 	//initialize_devfreq();
 	//initialize_tuning();

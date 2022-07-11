@@ -41,6 +41,7 @@
 using namespace spdlog;
 using namespace TCLAP;
 
+bool debug_enabled = false; 
 int debug_learning = 0;
 
 extern "C" {
@@ -235,9 +236,20 @@ int main(int argc, char *argv[])
 	Figlet::small.print("pwrmd");
 	try
 	{
-		CmdLine cmd("libpwrm is a embeddable library for measuring power usage by devices and processes..", ' ', "0.1", true);
-		UnlabeledValueArg<string> simArg("simulator","Name of simulator to run. Defaults to LJ (Lennard-Jones) atoms in cubic box.", false, "lj", "string", cmd);
-		cmd.parse(argc, argv);
+		CmdLine cmdline("libpwrm is a embeddable library for measuring power usage by devices and processes..", ' ', "0.1", true);
+		vector<string> _cmds {"rapl", "devices"};
+		ValuesConstraint<string> cmds(_cmds);
+		UnlabeledValueArg<string> cmd("cmd", "The command to run.     \nrapl - RAPL.     \ndevices - Work with devices.", true, "devices", &cmds, cmdline, false);
+		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
+		cmdline.parse(argc, argv);
+		debug_enabled = debug_arg.getValue();
+		if (debug_enabled)
+		{
+			info("Debug mode enabled.");
+		}
+		if (cmd.getValue() == "rapl") {
+			info("RAPL selected.");
+		}
 	}
 	catch (ArgException &e) 
    { 

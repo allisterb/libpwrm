@@ -96,4 +96,6 @@ extern void align_string(char *buffer, size_t min_sz, size_t max_sz);
 extern void ui_notify_user_ncurses(const char *frmt, ...);
 extern void ui_notify_user_console(const char *frmt, ...);
 extern void (*ui_notify_user) (const char *frmt, ...);
+
+extern bool debug_enabled;
 #endif

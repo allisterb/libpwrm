@@ -29,6 +29,9 @@
 #include "../parameters/parameters.h"
 #include <sys/time.h>
 
+#include "spdlog/spdlog.h"
+using namespace spdlog;
+
 struct frequency;
 
 class devfreq: public device {

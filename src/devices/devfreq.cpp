@@ -231,7 +231,7 @@ void create_all_devfreq_devices(void)
 	std::string p = "/sys/class/devfreq/";
 	dir = opendir(p.c_str());
 	if (dir == NULL) {
-		fprintf(stderr, "Devfreq not enabled\n");
+		info("Devfreq not enabled.");
 		is_enabled = false;
 		return;
 	}
@@ -240,7 +240,7 @@ void create_all_devfreq_devices(void)
 		num++;
 
 	if (num == 2) {
-		fprintf(stderr, "Devfreq not enabled\n");
+		info("Devfreq not enabled.");
 		is_enabled = false;
 		closedir(dir);
 		dir = NULL;

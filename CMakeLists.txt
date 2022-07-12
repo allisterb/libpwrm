@@ -81,7 +81,6 @@ target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent ${PCIUTILS_
 
 add_executable(pwrm_cli 
     src/main.cpp 
-    ${pwrm_headers}
     ${FIGLET_SRC}
 )
 

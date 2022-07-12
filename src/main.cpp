@@ -95,10 +95,10 @@ static void init(int auto_tune)
 	setrlimit (RLIMIT_NOFILE, &rlmt);
 
 	if (system("/sbin/modprobe cpufreq_stats > /dev/null 2>&1"))
-		error(_("modprobe cpufreq_stats failed."));
+		info(_("modprobe cpufreq_stats failed."));
 #if defined(__i386__) || defined(__x86_64__)
 	if (system("/sbin/modprobe msr > /dev/null 2>&1"))
-		error(_("modprobe msr failed."));
+		info(_("modprobe msr failed."));
 #endif
 	statfs("/sys/kernel/debug", &st_fs);
 
@@ -207,8 +207,9 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 
 
 void get_info(const string subsystem) {
-	info("Info {}.", subsystem);
-	exit(0);
+	for (ulong i = 0; i < all_devices.size(); i++) {
+		info("{} {} {}", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
+	}
 }
 
 int main(int argc, char *argv[])
@@ -243,6 +244,10 @@ int main(int argc, char *argv[])
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
 		}
+
+		clean_shutdown();
+
+		exit(EXIT_SUCCESS);
 	}
 	catch (ArgException &e) 
     { 

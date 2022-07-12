@@ -77,9 +77,7 @@ target_include_directories (pwrm PUBLIC
     src
 )
 
-target_link_libraries(pwrm PUBLIC traceevent ${PCIUTILS_LIBRARIES})
-
-target_link_libraries(pwrm PUBLIC Threads::Threads spdlog)
+target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent ${PCIUTILS_LIBRARIES})
 
 add_executable(pwrm_cli 
     src/main.cpp 
@@ -96,4 +94,4 @@ target_include_directories (pwrm_cli PUBLIC
     src
 )
 
-target_link_libraries(pwrm_cli PUBLIC pwrm spdlog)
+target_link_libraries(pwrm_cli PUBLIC pwrm)

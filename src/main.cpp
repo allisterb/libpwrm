@@ -43,6 +43,7 @@ using namespace TCLAP;
 
 bool debug_enabled = false; 
 int debug_learning = 0;
+bool is_root = false;
 
 extern "C" {
 	static volatile bool end_thread;
@@ -60,9 +61,12 @@ extern "C" {
 static void checkroot() {
 	int uid;
 	uid = getuid();
-
 	if (uid != 0) {
+		is_root = false;
 		warn("Not running with root privileges...some subsystems and devices may not be accessible.\n");
+	}
+	else {
+		is_root = true;
 	}
 
 }
@@ -207,8 +211,13 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 
 
 void get_info(const string subsystem) {
-	for (ulong i = 0; i < all_devices.size(); i++) {
-		info("{} {} {}", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
+	if (subsystem == "hw") {
+		for (ulong i = 0; i < all_devices.size(); i++) {
+			info("HW device class: {}. HW device name: {}. Human name: {}.", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
+		}
+	}
+	else if (subsystem == "rapl") {
+		get_rapl_info();
 	}
 }
 
@@ -224,14 +233,15 @@ int main(int argc, char *argv[])
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
 		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
-		vector<string> _systems {"rapl", "usb"};
+		vector<string> _systems {"hw", "rapl", "cpu"};
 		ValuesConstraint<string> systems(_systems);
 		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
 		\nrapl - Intel Running Average Power Limit.     \
-		\nusb - USB.", true, "rapl", &systems, cmdline, false);
+		\nusb - USB.", true, "hw", &systems, cmdline, false);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
+
 		debug_enabled = debug_arg.getValue();
 		if (debug_enabled)
 		{

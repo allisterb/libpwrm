@@ -5,7 +5,7 @@
             "label": "build",
             "command": "make",
             "args": [
-                "-j2",
+                "-j4",
             ],
             "options": {
                 "cwd": "${workspaceFolder}/build"

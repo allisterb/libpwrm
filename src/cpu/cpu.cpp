@@ -158,6 +158,7 @@ static class abstract_cpu * new_cpu(int number, char * vendor, int family, int m
 
 
 
+
 static void handle_one_cpu(unsigned int number, char *vendor, int family, int model)
 {
 	char filename[PATH_MAX];
@@ -553,4 +554,29 @@ void clear_all_cpus(void)
 		delete all_cpus[i];
 	}
 	all_cpus.clear();
+}
+
+
+void get_rapl_info() {
+	for (ulong i = 0; i < all_devices.size(); i++) {
+		if (strcmp(all_devices[i]->class_name(), "cpu rapl package") == 0) {
+			auto rapl_dev =  static_cast<cpu_rapl_device*>(all_devices[i]);
+			if (rapl_dev->device_present())
+			{
+				info("Intel RAPL interface detected.");
+				auto rapl = new c_rapl_interface();
+				info("PKG Domain present: {}", rapl->pkg_domain_present());
+				info("DRAM Domain present: {}", rapl->dram_domain_present());
+				info("PP0 Domain present: {}", rapl->pp0_domain_present());
+				info("PP1 Domain present: {}", rapl->pp1_domain_present());
+			}
+			return;
+		}
+	}
+	if (!is_root) {	
+		error("No Intel RAPL interface detected. Try running as root.");
+	}
+	else {
+		error("No Intel RAPL interface detected.");
+	}
 }

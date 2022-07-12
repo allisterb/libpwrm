@@ -245,6 +245,7 @@ static void create_all_usb_devices_callback(const char *d_name)
 
 	usb = new class usbdevice(device_name, filename, devid_name);
 	all_devices.push_back(usb);
+	debug("Detected USB device {} {}.", devid_name, device_name);
 	register_parameter(devid_name, 0.1);
 }
 

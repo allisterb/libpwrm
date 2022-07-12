@@ -88,7 +88,7 @@ c_rapl_interface::c_rapl_interface(const char *dev_name, int cpu) :
 	DIR *dir;
 	struct dirent *entry;
 
-	debug("Getting RAPL interface for CPU device {}...", dev_name);
+	debug("Getting RAPL interface for CPU package {}...", dev_name);
 
 	rapl_domains = 0;
 
@@ -293,7 +293,7 @@ int c_rapl_interface::get_pkg_energy_status(double *status)
 	ret = read_msr(first_cpu, MSR_PKG_ENERY_STATUS, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pkg_energy_status failed\n");
+		error("get_pkg_energy_status failed.");
 		return ret;
 	}
 
@@ -314,7 +314,7 @@ int c_rapl_interface::get_pkg_power_info(double *thermal_spec_power,
 	ret = read_msr(first_cpu, MSR_PKG_POWER_INFO, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pkg_power_info failed\n");
+		error("get_pkg_power_info failed.");
 		return ret;
 	}
 	*thermal_spec_power =  (value & 0x7FFF) * power_units;

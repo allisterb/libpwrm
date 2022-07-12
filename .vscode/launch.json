@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/pwrm_cli",
-            "args": [],
+            "args": ["info", "rapl"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

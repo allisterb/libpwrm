@@ -464,15 +464,15 @@ void process_glob(const char *d_glob, callback fn)
 
 	switch (glob(d_glob, GLOB_ERR | GLOB_MARK | GLOB_NOSORT, NULL, &g)) {
 	case GLOB_NOSPACE:
-		fprintf(stderr,_("glob returned GLOB_NOSPACE\n"));
+		debug(_("glob {} returned GLOB_NOSPACE."), d_glob);
 		globfree(&g);
 		return;
 	case GLOB_ABORTED:
-		fprintf(stderr,_("glob returned GLOB_ABORTED\n"));
+		debug(_("glob {} returned GLOB_ABORTED."), d_glob);
 		globfree(&g);
 		return;
 	case GLOB_NOMATCH:
-		fprintf(stderr,_("glob returned GLOB_NOMATCH\n"));
+		debug(_("glob {} returned GLOB_NOMATCH."), d_glob);
 		globfree(&g);
 		return;
 	}
@@ -497,9 +497,8 @@ int read_msr(int cpu, uint64_t offset, uint64_t *value)
 		snprintf(msr_path, sizeof(msr_path), "/dev/msr%d", cpu);
 
 		if (access(msr_path, R_OK) != 0){
-			fprintf(stderr,
-			 _("Model-specific registers (MSR)\
-			 not found (try enabling CONFIG_X86_MSR).\n"));
+			error(_("Model-specific registers (MSR)\
+			 not found (try enabling CONFIG_X86_MSR)."));
 			return -1;
 		}
 	}
@@ -533,8 +532,7 @@ int write_msr(int cpu, uint64_t offset, uint64_t value)
 		snprintf(msr_path, sizeof(msr_path), "/dev/msr%d", cpu);
 
 		if (access(msr_path, R_OK) != 0){
-			fprintf(stderr,
-			 _("Model-specific registers (MSR)\
+			error(_("Model-specific registers (MSR)\
 			 not found (try enabling CONFIG_X86_MSR).\n"));
 			return -1;
 		}

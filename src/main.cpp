@@ -97,10 +97,10 @@ static void powertop_init(int auto_tune)
 	setrlimit (RLIMIT_NOFILE, &rlmt);
 
 	if (system("/sbin/modprobe cpufreq_stats > /dev/null 2>&1"))
-		fprintf(stderr, _("modprobe cpufreq_stats failed\n"));
+		error(_("modprobe cpufreq_stats failed\n"));
 #if defined(__i386__) || defined(__x86_64__)
 	if (system("/sbin/modprobe msr > /dev/null 2>&1"))
-		fprintf(stderr, _("modprobe msr failed\n"));
+		error(_("modprobe msr failed\n"));
 #endif
 	statfs("/sys/kernel/debug", &st_fs);
 
@@ -112,12 +112,12 @@ static void powertop_init(int auto_tune)
 		}
 		if (ret != 0) {
 			if (!auto_tune) {
-				fprintf(stderr, _("Failed to mount debugfs!\n"));
-				fprintf(stderr, _("exiting...\n"));
+				error(_("Failed to mount debugfs!\n"));
+				error(_("exiting...\n"));
 				exit(EXIT_FAILURE);
 			} else {
-				fprintf(stderr, _("Failed to mount debugfs!\n"));
-				fprintf(stderr, _("Should still be able to auto tune...\n"));
+				error(_("Failed to mount debugfs!\n"));
+				error(_("Should still be able to auto tune...\n"));
 			}
 		}
 	}
@@ -230,6 +230,12 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	end_cpu_data();
 }
 
+
+void get_info(const string subsystem) {
+	info("Info {}.", subsystem);
+	exit(0);
+}
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -237,18 +243,27 @@ int main(int argc, char *argv[])
 	try
 	{
 		CmdLine cmdline("libpwrm is a embeddable library for measuring power usage by devices and processes..", ' ', "0.1", true);
-		vector<string> _cmds {"rapl", "devices"};
+		vector<string> _cmds {"measure", "info"};
 		ValuesConstraint<string> cmds(_cmds);
-		UnlabeledValueArg<string> cmd("cmd", "The command to run.     \nrapl - RAPL.     \ndevices - Work with devices.", true, "devices", &cmds, cmdline, false);
+		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
+		\nmeasure - Measure power consumption for the particular subsystem or device.     \
+		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
+		vector<string> _systems {"rapl", "usb"};
+		ValuesConstraint<string> systems(_systems);
+		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
+		\nrapl - Intel Running Average Power Limit.     \
+		\nusb - USB.", true, "rapl", &systems, cmdline, false);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
+		
 		cmdline.parse(argc, argv);
 		debug_enabled = debug_arg.getValue();
 		if (debug_enabled)
 		{
+			spdlog::set_level(spdlog::level::debug);
 			info("Debug mode enabled.");
 		}
-		if (cmd.getValue() == "rapl") {
-			info("RAPL selected.");
+		if (cmd.getValue() == "info") {
+			get_info(subsystem.getValue());
 		}
 	}
 	catch (ArgException &e) 
@@ -268,7 +283,7 @@ int main(int argc, char *argv[])
 	//initialize_devfreq();
 	//initialize_tuning();
 	info("Welcome to spdlog!");
-	for (int i = 0; i <all_devices.size(); i++) {
+	for (ulong i = 0; i < all_devices.size(); i++) {
 		info("CPU {}", all_devices[i]->human_name());
 	}
 	//info(abstract_cpu::)

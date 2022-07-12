@@ -62,9 +62,7 @@ static void checkroot() {
 	uid = getuid();
 
 	if (uid != 0) {
-		printf("PowerTOP  must be run with root privileges.\n");
-		printf("exiting...\n");
-		exit(EXIT_FAILURE);
+		warn("Not running with root privileges...some subsystems and devices may not be accessible.\n");
 	}
 
 }
@@ -81,7 +79,7 @@ static int get_nr_open(void) {
 	return nr_open;
 }
 
-static void powertop_init(int auto_tune)
+static void init(int auto_tune)
 {
 	static char initialized = 0;
 	int ret;
@@ -91,16 +89,16 @@ static void powertop_init(int auto_tune)
 	if (initialized)
 		return;
 
-	//checkroot();
+	checkroot();
 
 	rlmt.rlim_cur = rlmt.rlim_max = get_nr_open();
 	setrlimit (RLIMIT_NOFILE, &rlmt);
 
 	if (system("/sbin/modprobe cpufreq_stats > /dev/null 2>&1"))
-		error(_("modprobe cpufreq_stats failed\n"));
+		error(_("modprobe cpufreq_stats failed."));
 #if defined(__i386__) || defined(__x86_64__)
 	if (system("/sbin/modprobe msr > /dev/null 2>&1"))
-		error(_("modprobe msr failed\n"));
+		error(_("modprobe msr failed."));
 #endif
 	statfs("/sys/kernel/debug", &st_fs);
 
@@ -129,9 +127,6 @@ static void powertop_init(int auto_tune)
 	else
 		mkdir("/data/local/powertop", 0600);
 
-	//load_results("saved_results.powertop");
-	//load_parameters("saved_parameters.powertop");
-
 	enumerate_cpus();
 	create_all_devices();
 	create_all_devfreq_devices();
@@ -144,8 +139,7 @@ static void powertop_init(int auto_tune)
 	register_parameter("disk-operations-hard", 0.2);
 	register_parameter("disk-operations", 0.0);
 	register_parameter("xwakes", 0.1);
-	//load_parameters("saved_parameters.powertop");
-
+	
 	initialized = 1;
 }
 
@@ -192,6 +186,7 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 			global_sample_power();
 		}
 	}
+
 	end_cpu_measurement();
 	end_process_measurement();
 	collect_open_devices();
@@ -201,31 +196,11 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 
 	process_cpu_data();
 	process_process_data();
-
-	/* output stats */
-	//process_update_display();
-	//report_summary();
-	//w_display_cpu_cstates();
-	//w_display_cpu_pstates();
-	//if (reporttype != REPORT_OFF) {
-	//	report_display_cpu_cstates();
-	//	report_display_cpu_pstates();
-	//}
-	//report_process_update_display();
-	//tuning_update_display();
-	//wakeup_update_display();
 	end_process_data();
 
 	global_power();
 	compute_bundle();
 
-	//show_report_devices();
-	//report_show_open_devices();
-
-	//report_devices();
-	//display_devfreq_devices();
-	//report_devfreq_devices();
-	//ahci_create_device_stats_table();
 	store_results(measurement_time);
 	end_cpu_data();
 }
@@ -262,32 +237,22 @@ int main(int argc, char *argv[])
 			spdlog::set_level(spdlog::level::debug);
 			info("Debug mode enabled.");
 		}
+
+		init(0);
+
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
 		}
 	}
 	catch (ArgException &e) 
-   { 
+    { 
     	error("Error parsing option {0}: {1}.", e.argId(), e.error());
     	return 1;
-   }
-   catch (std::exception &e) 
-   { 
+    }
+    catch (std::exception &e) 
+    { 
    		error("Runtime error parsing options: {0}", e.what());
     	return 1; 
-   }
-	
-
-	
-	powertop_init(0);
-	//initialize_devfreq();
-	//initialize_tuning();
-	info("Welcome to spdlog!");
-	for (ulong i = 0; i < all_devices.size(); i++) {
-		info("CPU {}", all_devices[i]->human_name());
-	}
-	//info(abstract_cpu::)
-
-	//one_measurement(10, 1, nullptr);
-    return 0;
+    }
+	return EXIT_SUCCESS;
 }

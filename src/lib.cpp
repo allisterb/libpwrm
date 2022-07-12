@@ -497,8 +497,7 @@ int read_msr(int cpu, uint64_t offset, uint64_t *value)
 		snprintf(msr_path, sizeof(msr_path), "/dev/msr%d", cpu);
 
 		if (access(msr_path, R_OK) != 0){
-			error(_("Model-specific registers (MSR)\
-			 not found (try enabling CONFIG_X86_MSR)."));
+			error(_("Model-specific registers (MSR) not found. Try running as root or enabling CONFIG_X86_MSR."));
 			return -1;
 		}
 	}
@@ -532,8 +531,7 @@ int write_msr(int cpu, uint64_t offset, uint64_t value)
 		snprintf(msr_path, sizeof(msr_path), "/dev/msr%d", cpu);
 
 		if (access(msr_path, R_OK) != 0){
-			error(_("Model-specific registers (MSR)\
-			 not found (try enabling CONFIG_X86_MSR).\n"));
+			error(_("Model-specific registers (MSR) not found. Try running as root or enabling CONFIG_X86_MSR."));
 			return -1;
 		}
 	}

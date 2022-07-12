@@ -218,6 +218,7 @@ static void handle_one_cpu(unsigned int number, char *vendor, int family, int mo
 	if (number >= all_cpus.size())
 		all_cpus.resize(number + 1, NULL);
 	all_cpus[number] = cpu;
+	info("Detected CPU #{}: Vendor {}, Family {}, Model {}.", number, vendor, family, model);
 }
 
 static void handle_i965_gpu(void)

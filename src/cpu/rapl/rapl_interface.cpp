@@ -88,7 +88,7 @@ c_rapl_interface::c_rapl_interface(const char *dev_name, int cpu) :
 	DIR *dir;
 	struct dirent *entry;
 
-	RAPL_INFO_PRINT("RAPL device for cpu %d\n", cpu);
+	debug("Getting RAPL interface for CPU device {}...", dev_name);
 
 	rapl_domains = 0;
 
@@ -134,7 +134,7 @@ c_rapl_interface::c_rapl_interface(const char *dev_name, int cpu) :
 			closedir(dir);
 		}
 
-		RAPL_INFO_PRINT("RAPL Using PowerCap Sysfs : Domain Mask %x\n", rapl_domains);
+		info("RAPL Using PowerCap Sysfs : Domain Mask {}.", rapl_domains);
 		return;
 	}
 
@@ -145,43 +145,43 @@ c_rapl_interface::c_rapl_interface(const char *dev_name, int cpu) :
 	ret = read_msr(first_cpu, MSR_PKG_ENERY_STATUS, &value);
 	if (ret > 0) {
 		rapl_domains |= PKG_DOMAIN_PRESENT;
-		RAPL_DBG_PRINT("Domain : PKG present\n");
+		debug("Domain : PKG present.");
 	} else {
-		RAPL_DBG_PRINT("Domain : PKG Not present\n");
+		debug("Domain : PKG Not present.");
 	}
 
 	// Check presence of DRAM domain
 	ret = read_msr(first_cpu, MSR_DRAM_ENERY_STATUS, &value);
 	if (ret > 0) {
 		rapl_domains |= DRAM_DOMAIN_PRESENT;
-		RAPL_DBG_PRINT("Domain : DRAM present\n");
+		debug("Domain : DRAM present.");
 	} else {
-		RAPL_DBG_PRINT("Domain : DRAM Not present\n");
+		debug("Domain : DRAM Not present.");
 	}
 
 	// Check presence of PP0 domain
 	ret = read_msr(first_cpu, MSR_PP0_ENERY_STATUS, &value);
 	if (ret > 0) {
 		rapl_domains |= PP0_DOMAIN_PRESENT;
-		RAPL_DBG_PRINT("Domain : PP0 present\n");
+		debug("Domain : PP0 present.");
 	} else {
-		RAPL_DBG_PRINT("Domain : PP0 Not present\n");
+		debug("Domain : PP0 Not present.");
 	}
 
 	// Check presence of PP1 domain
 	ret = read_msr(first_cpu, MSR_PP1_ENERY_STATUS, &value);
 	if (ret > 0) {
 		rapl_domains |= PP1_DOMAIN_PRESENT;
-		RAPL_DBG_PRINT("Domain : PP1 present\n");
+		debug("Domain : PP1 present.");
 	} else {
-		RAPL_DBG_PRINT("Domain : PP1 Not present\n");
+		debug("Domain : PP1 Not present.");
 	}
 
 	power_units = get_power_unit();
 	energy_status_units = get_energy_status_unit();
 	time_units = get_time_unit();
 
-	RAPL_DBG_PRINT("RAPL Domain mask: %x\n", rapl_domains);
+	debug("RAPL Domain mask: {}.", rapl_domains);
 }
 
 bool c_rapl_interface::pkg_domain_present()

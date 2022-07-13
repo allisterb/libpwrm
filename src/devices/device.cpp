@@ -33,14 +33,10 @@
 
 using namespace std;
 
-#include "backlight.h"
 #include "usb.h"
 #include "ahci.h"
 #include "alsa.h"
-#include "rfkill.h"
 #include "i915-gpu.h"
-#include "thinkpad-fan.h"
-#include "thinkpad-light.h"
 #include "network.h"
 #include "runtime_pm.h"
 
@@ -141,14 +137,10 @@ static bool power_device_sort(class device * i, class device * j)
 
 void create_all_devices(void)
 {
-	//create_all_backlights();
 	create_all_usb_devices();
 	create_all_ahcis();
 	create_all_alsa();
-	//create_all_rfkills();
-	//create_i915_gpu();
-	//create_thinkpad_fan();
-	//create_thinkpad_light();
+	create_i915_gpu();
 	create_all_nics();
 	create_all_runtime_pm_devices();
 }

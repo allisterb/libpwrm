@@ -212,11 +212,15 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 
 void get_info(const string subsystem) {
 	if (subsystem == "hw") {
+		info("\n");
+		info("Printing hardware devices...");
 		for (ulong i = 0; i < all_devices.size(); i++) {
 			info("HW device class: {}. HW device name: {}. Human name: {}.", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
 		}
 	}
 	else if (subsystem == "rapl") {
+		info("\n");
+		info("Printing Intel RAPL info...");
 		get_rapl_info();
 	}
 }

@@ -176,6 +176,7 @@ static void do_bus(const char *bus)
 {
 	/* /sys/bus/pci/devices/0000\:00\:1f.0/power/runtime_suspended_time */
 
+	debug("Scanning {} bus...", bus);
 	struct dirent *entry;
 	DIR *dir;
 	char filename[PATH_MAX];

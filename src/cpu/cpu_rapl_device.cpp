@@ -67,7 +67,9 @@ void cpu_rapl_device::end_measurement(void)
 
 double cpu_rapl_device::power_usage(struct result_bundle *result, struct parameter_bundle *bundle)
 {
+	printf("consumed %f", consumed_power);
 	if (rapl->pp0_domain_present())
+
 		return consumed_power;
 	else
 		return 0.0;

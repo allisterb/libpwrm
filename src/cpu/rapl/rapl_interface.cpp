@@ -463,6 +463,7 @@ int c_rapl_interface::get_pp0_energy_status(double *status)
 
 	if (powercap_sysfs_present) {
 		string str = read_sysfs_string(powercap_core_path + "energy_uj");
+		info("powercap {}", str);
 		if (str.length() > 0) {
 			*status = atof(str.c_str()) / 1000000; // uj to Js
 			return 0;
@@ -471,12 +472,16 @@ int c_rapl_interface::get_pp0_energy_status(double *status)
 		return -EINVAL;
 	}
 
+	
+
 	ret = read_msr(first_cpu, MSR_PP0_ENERY_STATUS, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp0_energy_status failed\n");
+		error("get_pp0_energy_status failed");
 		return ret;
 	}
+
+	info("{}", value);
 
 	*status = (double) (value & 0xffffffff) * get_energy_status_unit();
 
@@ -494,7 +499,7 @@ int c_rapl_interface::get_pp0_power_limit(uint64_t *value)
 	ret = read_msr(first_cpu, MSR_PP0_POWER_LIMIT, value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp0_power_limit failed\n");
+		error("get_pp0_power_limit failed\n");
 		return ret;
 	}
 
@@ -512,7 +517,7 @@ int c_rapl_interface::set_pp0_power_limit(uint64_t value)
 	ret = write_msr(first_cpu, MSR_PP0_POWER_LIMIT, value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("set_pp0_power_limit failed\n");
+		error("set_pp0_power_limit failed\n");
 		return ret;
 	}
 
@@ -531,7 +536,7 @@ int c_rapl_interface::get_pp0_power_policy(unsigned int *pp0_power_policy)
 	ret = read_msr(first_cpu, MSR_PP0_POLICY, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp0_power_policy failed\n");
+		error("get_pp0_power_policy failed\n");
 		return ret;
 	}
 
@@ -562,7 +567,7 @@ int c_rapl_interface::get_pp1_energy_status(double *status)
 	ret = read_msr(first_cpu, MSR_PP1_ENERY_STATUS, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp1_energy_status failed\n");
+		error("get_pp1_energy_status failed");
 		return ret;
 	}
 
@@ -582,7 +587,7 @@ int c_rapl_interface::get_pp1_power_limit(uint64_t *value)
 	ret = read_msr(first_cpu, MSR_PP1_POWER_LIMIT, value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp1_power_info failed\n");
+		error("get_pp1_power_info failed");
 		return ret;
 	}
 
@@ -600,7 +605,7 @@ int c_rapl_interface::set_pp1_power_limit(uint64_t value)
 	ret = write_msr(first_cpu, MSR_PP1_POWER_LIMIT, value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("set_pp1_power_limit failed\n");
+		error("set_pp1_power_limit failed.");
 		return ret;
 	}
 
@@ -619,7 +624,7 @@ int c_rapl_interface::get_pp1_power_policy(unsigned int *pp1_power_policy)
 	ret = read_msr(first_cpu, MSR_PP1_POLICY, &value);
 	if(ret < 0)
 	{
-		RAPL_ERROR_PRINT("get_pp1_power_policy failed\n");
+		error("get_pp1_power_policy failed.");
 		return ret;
 	}
 

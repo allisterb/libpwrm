@@ -219,10 +219,20 @@ void get_info(const string subsystem) {
 		}
 	}
 	else if (subsystem == "rapl") {
-		info("\n");
+		info("");
 		info("Printing Intel RAPL info...");
 		get_rapl_info();
 	}
+}
+
+void measure(const string* subsystem) {
+	if (*subsystem == "rapl") {
+		start_rapl_cpu_measurement();
+		sleep(5);
+		auto p = end_rapl_cpu_measurement();
+		info("Power usage {}.", p);
+	}
+
 }
 
 int main(int argc, char *argv[])
@@ -231,7 +241,7 @@ int main(int argc, char *argv[])
 	Figlet::small.print("pwrmd");
 	try
 	{
-		CmdLine cmdline("libpwrm is a embeddable library for measuring power usage by devices and processes..", ' ', "0.1", true);
+		CmdLine cmdline("libpwrm is a embeddable library for measuring power usage by hardware devices.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info"};
 		ValuesConstraint<string> cmds(_cmds);
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
@@ -257,6 +267,9 @@ int main(int argc, char *argv[])
 
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
+		}
+		else if (cmd.getValue() == "measure") {
+			measure(&subsystem.getValue());
 		}
 
 		clean_shutdown();

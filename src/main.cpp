@@ -228,9 +228,22 @@ void get_info(const string subsystem) {
 void measure(const string* subsystem) {
 	if (*subsystem == "rapl") {
 		start_rapl_cpu_measurement();
-		sleep(5);
+		sleep(1);
 		auto p = end_rapl_cpu_measurement();
 		info("Power usage {}.", p);
+
+		start_rapl_cpu_measurement();
+		sleep(1);
+		p = end_rapl_cpu_measurement();
+		info("Power usage {}.", p);
+	}
+	else if (*subsystem == "meter")
+	{
+		start_power_measurement();
+		sleep(5);
+		end_power_measurement();
+		auto p = global_power();
+		info("Power usage: {}", p);
 	}
 
 }
@@ -247,7 +260,7 @@ int main(int argc, char *argv[])
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
 		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
-		vector<string> _systems {"hw", "rapl", "cpu"};
+		vector<string> _systems {"hw", "rapl", "cpu", "meter"};
 		ValuesConstraint<string> systems(_systems);
 		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
 		\nrapl - Intel Running Average Power Limit.     \

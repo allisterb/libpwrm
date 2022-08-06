@@ -481,7 +481,7 @@ int c_rapl_interface::get_pp0_energy_status(double *status)
 		return ret;
 	}
 
-	info("{}", value);
+	info("msr {}", value);
 
 	*status = (double) (value & 0xffffffff) * get_energy_status_unit();
 

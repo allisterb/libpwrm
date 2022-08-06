@@ -1,0 +1,1 @@
+curl -X POST https://api2.watttime.org/v2/register -H "Content-Type: application/json" -d "{\"username\": \"foo\", \"password\": \"bar\", \"email\": \"bar\"}"

@@ -86,8 +86,8 @@ double global_power(void)
 	}
 
 	/* report global time left if at least one battery is discharging */
-	if (!global_discharging)
-		return 0.0;
+	//if (!global_discharging)
+	//	return 0.0;
 
 	all_results.power = total;
 	if (total < min_power && total > 0.01)

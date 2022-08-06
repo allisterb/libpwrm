@@ -568,6 +568,20 @@ void get_rapl_info() {
 				info("DRAM Domain present: {}", rapl->dram_domain_present());
 				info("PP0 Domain present: {}", rapl->pp0_domain_present());
 				info("PP1 Domain present: {}", rapl->pp1_domain_present());
+				info("Power unit : {:01.3f}W.", rapl->get_power_unit());
+				info("CPU Energy unit : {:01.8f}W.", rapl->get_energy_status_unit());
+				uint64_t v = 10;
+				double s = 110.0;
+				double p1 = -1.0;
+				double p2 = -1.0;
+				double p3 = -1.0;
+				double p4 = -1.0;
+				rapl->get_pkg_power_info(&p1, &p2, &p3, &p4);
+				info("PKG thermal spec power: {:01.3f}W.", p1);
+				info("PKG maximum power: {:01.3f}W.", p2);
+				info("PKG minimum power: {:01.3f}W.", p3);
+				info("PKG maximum time window: {:01.3f}W.", p4);
+				//info("PKG params: {} {} {} {}", p1, p2, p3, p4);
 			}
 			return;
 		}

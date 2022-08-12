@@ -226,6 +226,7 @@ void get_info(const string subsystem) {
 }
 
 void measure(const string* subsystem) {
+	//init(0);
 	if (*subsystem == "rapl") {
 		start_rapl_cpu_measurement();
 		sleep(1);
@@ -239,6 +240,7 @@ void measure(const string* subsystem) {
 	}
 	else if (*subsystem == "meter")
 	{
+		detect_power_meters();
 		start_power_measurement();
 		sleep(5);
 		end_power_measurement();
@@ -276,7 +278,7 @@ int main(int argc, char *argv[])
 			info("Debug mode enabled.");
 		}
 
-		init(0);
+		
 
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());

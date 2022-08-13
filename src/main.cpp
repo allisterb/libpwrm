@@ -212,40 +212,60 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 
 void get_info(const string subsystem) {
 	if (subsystem == "hw") {
-		info("\n");
-		info("Printing hardware devices...");
-		for (ulong i = 0; i < all_devices.size(); i++) {
-			info("HW device class: {}. HW device name: {}. Human name: {}.", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
+		create_all_devices();
+		create_all_usb_devices();
+		info("\nPrinting hardware devices...");
+		if (debug_enabled) {
+			for (ulong i = 0; i < all_devices.size(); i++) {
+				info("HW device class: {}. HW device name: {}. Human name: {}.", all_devices[i]->class_name(), all_devices[i]->device_name(), all_devices[i]->human_name());
+			}
+		}
+		else {
+			for (ulong i = 0; i < all_devices.size(); i++) {
+				info("HW device name: {}. Human name: {}.", all_devices[i]->device_name(), all_devices[i]->human_name());
+			}
 		}
 	}
 	else if (subsystem == "rapl") {
-		info("");
-		info("Printing Intel RAPL info...");
+		enumerate_cpus();
+		create_all_devices();
+		if (!get_rapl_device_present())
+		{
+			return;
+		}
 		get_rapl_info();
+	}
+	else if (subsystem == "meter") {
+		detect_power_meters();
+		print_power_meter_info();
 	}
 }
 
-void measure(const string* subsystem) {
+void measure(const string* subsystem, int time) {
 	//init(0);
 	if (*subsystem == "rapl") {
+		enumerate_cpus();
+		create_all_devices();
+		if (!get_rapl_device_present())
+		{
+			return;
+		}
+		
+		info("Measuring CPU power usage for {} seconds using Intel RAPL interface...", time);
 		start_rapl_cpu_measurement();
-		sleep(1);
+		sleep(time);
 		auto p = end_rapl_cpu_measurement();
-		info("Power usage {}.", p);
-
-		start_rapl_cpu_measurement();
-		sleep(1);
-		p = end_rapl_cpu_measurement();
 		info("Power usage {}.", p);
 	}
 	else if (*subsystem == "meter")
 	{
 		detect_power_meters();
+		info("Measuring system power usage for {} seconds using power meter...", time);
 		start_power_measurement();
-		sleep(5);
+		sleep(time);
 		end_power_measurement();
-		auto p = global_power();
-		info("Power usage: {}", p);
+		global_sample_power();
+		info("Energy usage for {}s: {}J.", time, global_joules());
 	}
 
 }
@@ -267,6 +287,7 @@ int main(int argc, char *argv[])
 		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
 		\nrapl - Intel Running Average Power Limit.     \
 		\nusb - USB.", true, "hw", &systems, cmdline, false);
+		ValueArg<int> time_arg("t", "time","Time in seconds to measure power usage. Default is 10 seconds.",false, 100, "integer", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -284,7 +305,7 @@ int main(int argc, char *argv[])
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {
-			measure(&subsystem.getValue());
+			measure(&subsystem.getValue(), time_arg.getValue());
 		}
 
 		clean_shutdown();

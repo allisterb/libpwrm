@@ -92,6 +92,7 @@ double global_power(void)
 	all_results.power = total;
 	if (total < min_power && total > 0.01)
 		min_power = total;
+	debug("Global power usage: {}W.", total);
 	return total;
 }
 
@@ -191,4 +192,14 @@ void extech_power_meter(const char *devnode)
 	meter = new class extech_power_meter(devnode);
 
 	power_meters.push_back(meter);
+}
+
+void print_power_meter_info()
+{
+	for (uint i = 0; i < power_meters.size(); i++) {
+		info("Power meter index: {}.", i);
+		info("Device capacity: {}mWh.", power_meters[i]->dev_capacity());
+		info("Device is discharging: {}.", power_meters[i]->is_discharging());
+		info("Current power usage: {}W.", global_power());
+	}
 }

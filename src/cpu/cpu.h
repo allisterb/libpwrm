@@ -232,6 +232,7 @@ extern void clear_cpu_data(void);
 extern void clear_all_cpus(void);
 
 extern void get_rapl_info();
+extern bool get_rapl_device_present();
 extern void start_rapl_cpu_measurement();
 extern double end_rapl_cpu_measurement();  
 #endif

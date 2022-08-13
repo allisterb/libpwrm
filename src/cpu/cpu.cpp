@@ -562,7 +562,7 @@ void get_rapl_info() {
 			auto rapl_dev =  static_cast<cpu_rapl_device*>(all_devices[i]);
 			if (rapl_dev->device_present())
 			{
-				info("Intel RAPL interface detected.");
+				info("Printing Intel RAPL info...");
 				auto rapl = new c_rapl_interface();
 				info("PKG Domain present: {}", rapl->pkg_domain_present());
 				info("DRAM Domain present: {}", rapl->dram_domain_present());
@@ -586,24 +586,16 @@ void get_rapl_info() {
 			return;
 		}
 	}
-	if (!is_root) {	
-		error("No Intel RAPL interface detected. Try running as root.");
-	}
-	else {
-		error("No Intel RAPL interface detected.");
-	}
 }
 
-void start_rapl_cpu_measurement() {
-		for (ulong i = 0; i < all_devices.size(); i++) {
+bool get_rapl_device_present() {
+	for (ulong i = 0; i < all_devices.size(); i++) {
 		if (strcmp(all_devices[i]->class_name(), "cpu rapl package") == 0) {
 			auto rapl_dev =  static_cast<cpu_rapl_device*>(all_devices[i]);
-			if (rapl_dev->device_present())
-			{
+			if (rapl_dev->device_present()) {
 				info("Intel RAPL interface detected.");
-				rapl_dev->start_measurement();
+				return true;
 			}
-			return;
 		}
 	}
 	if (!is_root) {	
@@ -612,6 +604,20 @@ void start_rapl_cpu_measurement() {
 	else {
 		error("No Intel RAPL interface detected.");
 	}
+	return false;
+}
+
+void start_rapl_cpu_measurement() {
+		for (ulong i = 0; i < all_devices.size(); i++) {
+			if (strcmp(all_devices[i]->class_name(), "cpu rapl package") == 0) {
+				auto rapl_dev =  static_cast<cpu_rapl_device*>(all_devices[i]);
+				if (rapl_dev->device_present())
+				{
+					rapl_dev->start_measurement();
+				}
+				return;
+			}
+		}
 }
 
 double end_rapl_cpu_measurement() {

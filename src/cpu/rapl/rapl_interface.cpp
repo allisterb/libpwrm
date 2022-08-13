@@ -480,9 +480,7 @@ int c_rapl_interface::get_pp0_energy_status(double *status)
 		error("get_pp0_energy_status failed");
 		return ret;
 	}
-
-	info("msr {}", value);
-
+	
 	*status = (double) (value & 0xffffffff) * get_energy_status_unit();
 
 	return ret;

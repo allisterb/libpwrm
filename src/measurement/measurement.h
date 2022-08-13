@@ -68,4 +68,5 @@ extern void extech_power_meter(const char *devnode);
 
 extern double min_power;
 
+extern void print_power_meter_info();
 #endif

@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 		#ifdef CUDAToolkit_FOUND
 		vector<string> _systems {"hw", "rapl", "cpu", "meter", "nv"};
 		#else
-		vector<string> _systems {"hw", "rapl", "cpu", "meter", "cuda"};
+		vector<string> _systems {"hw", "rapl", "cpu", "meter"};
 		#endif
 		ValuesConstraint<string> systems(_systems);
 		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \

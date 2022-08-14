@@ -12,14 +12,24 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
 
-find_package(CUDAToolkit)
-
-add_compile_definitions(CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
-
 include(src/cmake/pciutils.cmake)
 
 if(NOT ${PCIUTILS_FOUND})
     message(FATAL_ERROR "pciutils library not found.")
+endif()
+
+find_package(CUDAToolkit)
+
+if(${CUDAToolkit_FOUND})
+    add_compile_definitions(CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
+    set(nvmlpower_headers
+        ${CUDAToolkit_INCLUDE_DIRS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.h
+    CACHE INTERNAL "")
+
+    set(nvmlpower_sources
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.cpp
+    CACHE INTERNAL "")
 endif()
 
 set (SPDLOG_SRC 
@@ -48,17 +58,6 @@ add_subdirectory(src/parameters)
 add_subdirectory(src/process)
 add_subdirectory(src/devices)
 add_subdirectory(src/cpu)
-
-
-message("Including support for NVIDIA GPU cards...")
-
-set(nvmlpower_headers
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.h
-CACHE INTERNAL "")
-
-set(nvmlpower_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.cpp
-CACHE INTERNAL "")
 
 
 set(pwrm_headers      
@@ -96,7 +95,11 @@ target_include_directories (pwrm PUBLIC
     src
 )
 
-target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent CUDA::nvml ${PCIUTILS_LIBRARIES})
+if(${CUDAToolkit_FOUND})
+    target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent CUDA::nvml ${PCIUTILS_LIBRARIES})
+else()
+    target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent ${PCIUTILS_LIBRARIES})
+endif()
 
 add_executable(pwrm_cli 
     src/main.cpp 

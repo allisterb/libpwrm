@@ -7,11 +7,10 @@ set(nvml_power_sources
   ${CMAKE_CURRENT_SOURCE_DIR}/nvml_power.cpp
   CACHE INTERNAL "")
 
-add_library(nvml_power STATIC
+add_library(nvml_power SHARED
             ${nvml_power_sources}
             ${nvml_power_headers}
 )
 
-target_compile_definitions(nvml_power PRIVATE CUDAToolkit_FOUND=1)
 target_link_libraries(nvml_power PUBLIC CUDA::nvml)
 

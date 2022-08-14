@@ -3,7 +3,7 @@ cmake_policy(SET CMP0048 NEW)
 
 project(libpwrm VERSION "0.1.0" LANGUAGES C CXX)
 
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.17 FATAL_ERROR)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -12,10 +12,14 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(Threads REQUIRED)
 
+find_package(CUDAToolkit)
+
+add_compile_definitions(CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
+
 include(src/cmake/pciutils.cmake)
 
 if(NOT ${PCIUTILS_FOUND})
-message(FATAL_ERROR "pciutils library not found.")
+    message(FATAL_ERROR "pciutils library not found.")
 endif()
 
 set (SPDLOG_SRC 
@@ -45,6 +49,18 @@ add_subdirectory(src/process)
 add_subdirectory(src/devices)
 add_subdirectory(src/cpu)
 
+
+message("Including support for NVIDIA GPU cards...")
+
+set(nvmlpower_headers
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.h
+CACHE INTERNAL "")
+
+set(nvmlpower_sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/nvidia/nvml_power.cpp
+CACHE INTERNAL "")
+
+
 set(pwrm_headers      
     ${traceevent_headers}
     ${measurement_headers}
@@ -53,6 +69,7 @@ set(pwrm_headers
     ${process_headers}
     ${devices_headers}
     ${cpu_headers}
+    ${nvmlpower_headers}
     src/devlist.h
     src/lib.h
 )
@@ -65,6 +82,7 @@ add_library(pwrm SHARED
     ${process_sources}
     ${devices_sources}
     ${cpu_sources}
+    ${nvmlpower_sources}
     src/devlist.cpp
     src/lib.cpp
 )
@@ -72,12 +90,13 @@ add_library(pwrm SHARED
 target_compile_options(pwrm PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector -pthread)
 
 target_include_directories (pwrm PUBLIC 
-    ${PCIUTILS_INCLUDE_DIR} 
+    ${PCIUTILS_INCLUDE_DIR}
+    ${CUDAToolkit_INCLUDE_DIRS}
     ext/spdlog/include 
     src
 )
 
-target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent ${PCIUTILS_LIBRARIES})
+target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent CUDA::nvml ${PCIUTILS_LIBRARIES})
 
 add_executable(pwrm_cli 
     src/main.cpp 
@@ -89,7 +108,7 @@ target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-p
 target_include_directories (pwrm_cli PUBLIC 
     ext/spdlog/include
     ext/embedFiglet/src
-    ext/tclap-1.2.3/include    
+    ext/tclap-1.2.3/include 
     src
 )
 

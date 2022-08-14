@@ -29,7 +29,7 @@
 #include "tuning/tuning.h"
 
 #include "devlist.h"
-
+#include "nvidia/nvml_power.h"
 #include "Figlet.hh"
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
@@ -40,6 +40,7 @@
 
 using namespace spdlog;
 using namespace TCLAP;
+
 
 bool debug_enabled = false; 
 int debug_learning = 0;

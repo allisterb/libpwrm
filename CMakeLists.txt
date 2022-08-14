@@ -96,6 +96,7 @@ target_include_directories (pwrm PUBLIC
 )
 
 if(${CUDAToolkit_FOUND})
+    target_compile_definitions(pwrm PRIVATE CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
     target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent CUDA::nvml ${PCIUTILS_LIBRARIES})
 else()
     target_link_libraries(pwrm PUBLIC Threads::Threads spdlog traceevent ${PCIUTILS_LIBRARIES})
@@ -107,6 +108,10 @@ add_executable(pwrm_cli
 )
 
 target_compile_options(pwrm_cli PUBLIC -Wall -Wformat -Wshadow -fno-omit-frame-pointer -fstack-protector)
+
+if(${CUDAToolkit_FOUND})
+    target_compile_definitions(pwrm_cli PRIVATE CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
+endif()
 
 target_include_directories (pwrm_cli PUBLIC 
     ext/spdlog/include

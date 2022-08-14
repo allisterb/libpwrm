@@ -1,5 +1,5 @@
 #include "nvml_power.h"
-//#include 
+
 /*
 These may be encompassed in a class if desired. Trivial CUDA programs written for the purpose of benchmarking might prefer this approach.
 */
@@ -15,6 +15,73 @@ nvmlComputeMode_t computeMode;
 
 pthread_t powerPollThread;
 
+void get_cuda_devices_info() {
+	nvmlResult = nvmlInit();
+	if (NVML_SUCCESS != nvmlResult)
+	{
+		error("NVML init fail: {}", nvmlErrorString(nvmlResult));
+		return;
+	}
+
+	nvmlResult = nvmlDeviceGetCount(&deviceCount);
+	if (NVML_SUCCESS != nvmlResult)
+	{
+		error("Failed to query device count: {}", nvmlErrorString(nvmlResult));
+		return;
+	}
+
+	for (int i = 0; i < deviceCount; i++)
+	{
+		nvmlResult = nvmlDeviceGetHandleByIndex(i, &nvmlDeviceID);
+		if (NVML_SUCCESS != nvmlResult)
+		{
+			error("Failed to get handle for device {}: {}", i, nvmlErrorString(nvmlResult));
+			return;
+		}
+
+		nvmlResult = nvmlDeviceGetName(nvmlDeviceID, deviceNameStr, sizeof(deviceNameStr)/sizeof(deviceNameStr[0]));
+		if (NVML_SUCCESS != nvmlResult)
+		{
+			error("Failed to get name of device {}: {}", i, nvmlErrorString(nvmlResult));
+			return;
+		}
+
+		// Get PCI information of the device.
+		nvmlResult = nvmlDeviceGetPciInfo(nvmlDeviceID, &nvmPCIInfo);
+		if (NVML_SUCCESS != nvmlResult)
+		{
+			error("Failed to get PCI info of device {}: {}", i, nvmlErrorString(nvmlResult));
+			return;
+		}
+
+
+
+		info("GPU Device #{}: {}.", i, deviceNameStr);
+		/*
+
+		// Get the compute mode of the device which indicates CUDA capabilities.
+		nvmlResult = nvmlDeviceGetComputeMode(nvmlDeviceID, &computeMode);
+		if (NVML_ERROR_NOT_SUPPORTED == nvmlResult)
+		{
+			printf("This is not a CUDA-capable device.\n");
+		}
+		else if (NVML_SUCCESS != nvmlResult)
+		{
+			printf("Failed to get compute mode for device %i: %s\n", i, nvmlErrorString(nvmlResult));
+			exit(0);
+		}
+		*/
+
+	}
+
+	nvmlResult = nvmlShutdown();
+	if (NVML_SUCCESS != nvmlResult)
+	{
+		error("Failed to shut down NVML: {}", nvmlErrorString(nvmlResult));
+		return;
+	}
+
+}
 /*
 Poll the GPU using nvml APIs.
 */

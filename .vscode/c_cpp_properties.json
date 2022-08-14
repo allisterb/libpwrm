@@ -6,7 +6,7 @@
                 "${workspaceFolder}/**",
                 "/usr/local/cuda/include/**"
             ],
-            "defines": [],
+            "defines": ["CUDAToolkit_FOUND"],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",

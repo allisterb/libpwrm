@@ -10,9 +10,12 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "../lib.h"
+
 void nvmlAPIRun();
 void nvmlAPIEnd();
 void *powerPollingFunc(void *ptr);
 int getNVMLError(nvmlReturn_t resultToCheck);
 
+void get_cuda_devices_info();
 #endif

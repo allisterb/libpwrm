@@ -29,7 +29,11 @@
 #include "tuning/tuning.h"
 
 #include "devlist.h"
+
+#ifdef CUDAToolkit_FOUND
 #include "nvidia/nvml_power.h"
+#endif
+
 #include "Figlet.hh"
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
@@ -240,6 +244,11 @@ void get_info(const string subsystem) {
 		detect_power_meters();
 		print_power_meter_info();
 	}
+	#ifdef CUDAToolkit_FOUND
+	else if (subsystem == "cuda") {
+		get_cuda_devices_info();
+	}
+	#endif
 }
 
 void measure(const string* subsystem, int time) {
@@ -283,7 +292,11 @@ int main(int argc, char *argv[])
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
 		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
-		vector<string> _systems {"hw", "rapl", "cpu", "meter"};
+		#ifdef CUDAToolkit_FOUND
+		vector<string> _systems {"hw", "rapl", "cpu", "meter", "cuda"};
+		#else
+		vector<string> _systems {"hw", "rapl", "cpu", "meter", "cuda"};
+		#endif
 		ValuesConstraint<string> systems(_systems);
 		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
 		\nrapl - Intel Running Average Power Limit.     \
@@ -299,9 +312,6 @@ int main(int argc, char *argv[])
 			spdlog::set_level(spdlog::level::debug);
 			info("Debug mode enabled.");
 		}
-
-		
-
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
 		}

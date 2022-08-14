@@ -17,5 +17,5 @@ void nvmlAPIEnd();
 void *powerPollingFunc(void *ptr);
 int getNVMLError(nvmlReturn_t resultToCheck);
 
-void get_cuda_devices_info();
+void print_nv_devices_info();
 #endif

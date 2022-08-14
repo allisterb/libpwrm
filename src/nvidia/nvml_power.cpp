@@ -15,7 +15,8 @@ nvmlComputeMode_t computeMode;
 
 pthread_t powerPollThread;
 
-void get_cuda_devices_info() {
+void print_nv_devices_info() {
+	info ("Printing NVIDIA GPU devices info...");
 	nvmlResult = nvmlInit();
 	if (NVML_SUCCESS != nvmlResult)
 	{
@@ -30,7 +31,7 @@ void get_cuda_devices_info() {
 		return;
 	}
 
-	for (int i = 0; i < deviceCount; i++)
+	for (uint i = 0; i < deviceCount; i++)
 	{
 		nvmlResult = nvmlDeviceGetHandleByIndex(i, &nvmlDeviceID);
 		if (NVML_SUCCESS != nvmlResult)
@@ -54,9 +55,9 @@ void get_cuda_devices_info() {
 			return;
 		}
 
-
-
-		info("GPU Device #{}: {}.", i, deviceNameStr);
+		// Get the compute mode of the device which indicates CUDA capabilities.
+		nvmlResult = nvmlDeviceGetComputeMode(nvmlDeviceID, &computeMode);
+		info("GPU Device #{}: {}. CUDA capable: {}.", i, deviceNameStr, nvmlResult != NVML_ERROR_NOT_SUPPORTED);
 		/*
 
 		// Get the compute mode of the device which indicates CUDA capabilities.

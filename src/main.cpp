@@ -245,8 +245,8 @@ void get_info(const string subsystem) {
 		print_power_meter_info();
 	}
 	#ifdef CUDAToolkit_FOUND
-	else if (subsystem == "cuda") {
-		get_cuda_devices_info();
+	else if (subsystem == "nv") {
+		print_nv_devices_info();
 	}
 	#endif
 }
@@ -293,7 +293,7 @@ int main(int argc, char *argv[])
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
 		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
 		#ifdef CUDAToolkit_FOUND
-		vector<string> _systems {"hw", "rapl", "cpu", "meter", "cuda"};
+		vector<string> _systems {"hw", "rapl", "cpu", "meter", "nv"};
 		#else
 		vector<string> _systems {"hw", "rapl", "cpu", "meter", "cuda"};
 		#endif

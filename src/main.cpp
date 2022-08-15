@@ -214,7 +214,6 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	end_cpu_data();
 }
 
-
 void get_info(const string subsystem) {
 	if (subsystem == "hw") {
 		create_all_devices();
@@ -232,8 +231,7 @@ void get_info(const string subsystem) {
 		}
 	}
 	else if (subsystem == "rapl") {
-		enumerate_cpus();
-		create_all_devices();
+		init(0);
 		if (!get_rapl_device_present())
 		{
 			return;

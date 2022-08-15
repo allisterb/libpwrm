@@ -34,6 +34,8 @@
 #include "nvidia/nvml_power.h"
 #endif
 
+#include "reporting/reporting.h"
+
 #include "Figlet.hh"
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
@@ -251,6 +253,7 @@ void get_info(const string subsystem) {
 
 void measure(const string* subsystem, const string* devid, int time) {
 	//init(0);
+	std::map<string, double> measurements;
 	if (*subsystem == "rapl") {
 		enumerate_cpus();
 		create_all_devices();
@@ -263,6 +266,7 @@ void measure(const string* subsystem, const string* devid, int time) {
 		start_rapl_cpu_measurement();
 		sleep(time);
 		auto p = end_rapl_cpu_measurement();
+		measurements["rapl"] = p;
 		info("Power usage {}.", p);
 	}
 	else if (*subsystem == "meter")
@@ -273,13 +277,17 @@ void measure(const string* subsystem, const string* devid, int time) {
 		sleep(time);
 		end_power_measurement();
 		global_sample_power();
+		measurements["meter"] = global_power();
 		info("Energy usage for {}s: {}J.", time, global_joules());
 	}
 	#ifdef CUDAToolkit_FOUND
 	else if (*subsystem == "nv") {
 		init_nvml();
 		unsigned int r = -1;
-		measure_nv_device_power(0, 0, &r);
+		char* name;
+		measure_nv_device_power(atoi(devid->c_str()), 0, name, &r);
+		//info("GPU Device #{}: {}.", devid, name);
+		measurements[string(name)] = r / 1000.0;
 		shutdown_nvml();
 		info("Power draw: {:03.2f}W.", r / 1000.0);
 	}
@@ -293,16 +301,16 @@ int main(int argc, char *argv[])
 	Figlet::small.print("pwrmd");
 	try
 	{
-		CmdLine cmdline("pwrm is a program for measuring and reporting power usage by hardware devices in .", ' ', "0.1", true);
+		CmdLine cmdline("pwrm is a program for measuring and reporting power usage by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info"};
 		ValuesConstraint<string> cmds(_cmds);
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
 		\ninfo - Print out information for the specified subsystem or device.",  true, "measure", &cmds, cmdline, false);
 		#ifdef CUDAToolkit_FOUND
-		vector<string> _systems {"hw", "rapl", "cpu", "meter", "nv"};
+		vector<string> _systems {"hw", "rapl", "meter", "nv"};
 		#else
-		vector<string> _systems {"hw", "rapl", "cpu", "meter"};
+		vector<string> _systems {"hw", "rapl", "meter"};
 		#endif
 		ValuesConstraint<string> systems(_systems);
 		UnlabeledValueArg<string> subsystem("subsystem", "The subsystem or device to measure or report on.     \
@@ -310,7 +318,9 @@ int main(int argc, char *argv[])
 		\nrapl - Intel Running Average Power Limit CPU hardware interface.     \
 		\nmeter - ACPI or other power meters.", true, "hw", &systems, cmdline, false);
 		ValueArg<int> time_arg("t", "time","Time in seconds to measure power usage. Default is 10 seconds.",false, 100, "integer", cmdline);
-		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "integer", cmdline);
+		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
+		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
+		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is report-base.json.", false, "report-base.json", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);

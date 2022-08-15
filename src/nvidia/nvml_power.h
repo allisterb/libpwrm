@@ -16,5 +16,5 @@ int getNVMLError(nvmlReturn_t resultToCheck);
 bool init_nvml();
 bool shutdown_nvml();
 void print_nv_devices_info();
-bool measure_nv_device_power(int devid, int time, unsigned int* r);
+bool measure_nv_device_power(int devid, int time, char* name, unsigned int* r);
 #endif

@@ -83,6 +83,7 @@ add_library(pwrm SHARED
     ${cpu_sources}
     ${nvmlpower_sources}
     src/devlist.cpp
+    src/json.hpp
     src/lib.cpp
 )
 

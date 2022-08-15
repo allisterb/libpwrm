@@ -283,8 +283,7 @@ void measure(const string* subsystem, const string* devid, int time) {
 		unsigned int r = -1;
 		measure_nv_device_power(0, 0, &r);
 		shutdown_nvml();
-		info("Power: {}", r);
-		//print_nv_devices_info();
+		info("Power draw: {:03.2f}W.", r / 1000.0);
 	}
 	#endif
 

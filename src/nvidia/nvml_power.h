@@ -12,11 +12,7 @@
 
 #include "../lib.h"
 
-void nvmlAPIRun();
-void nvmlAPIEnd();
-void *powerPollingFunc(void *ptr);
 int getNVMLError(nvmlReturn_t resultToCheck);
-
 bool init_nvml();
 bool shutdown_nvml();
 void print_nv_devices_info();

@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "nvml_power.h"
 
 /*
@@ -13,7 +14,41 @@ nvmlPciInfo_t nvmPCIInfo;
 nvmlEnableState_t pmmode;
 nvmlComputeMode_t computeMode;
 
+bool nvmlInitialized = false;
 pthread_t powerPollThread;
+
+bool init_nvml()
+{
+	if (nvmlInitialized)
+	{
+		throw new std::runtime_error("NVML is already initialized.");
+	}
+	nvmlResult = nvmlInit();
+	if (NVML_SUCCESS != nvmlResult) {
+		error("NVML init fail: {}", nvmlErrorString(nvmlResult));
+		return false;
+	}
+	else {
+		nvmlInitialized = true;
+		return true;
+	}
+}
+
+bool shutdown_nvml()
+{
+	if (!nvmlInitialized)
+	{
+		throw new std::runtime_error("NVML is not initialized.");
+	}
+	nvmlResult = nvmlShutdown();
+	if (NVML_SUCCESS != nvmlResult) {
+		error("Failed to shut down NVML: {}", nvmlErrorString(nvmlResult));
+		return false;
+	}
+	else {
+		return true;
+	}
+}
 
 void print_nv_devices_info() {
 	info ("Printing NVIDIA GPU devices info...");
@@ -57,7 +92,10 @@ void print_nv_devices_info() {
 
 		// Get the compute mode of the device which indicates CUDA capabilities.
 		nvmlResult = nvmlDeviceGetComputeMode(nvmlDeviceID, &computeMode);
-		info("GPU Device #{}: {}. CUDA capable: {}.", i, deviceNameStr, nvmlResult != NVML_ERROR_NOT_SUPPORTED);
+		bool cuda_capable = nvmlResult != NVML_ERROR_NOT_SUPPORTED;
+		nvmlResult = nvmlDeviceGetPowerManagementMode(nvmlDeviceID, &pmmode);
+		bool pmm_capable = pmmode == NVML_FEATURE_ENABLED;
+		info("GPU Device #{}: {}. CUDA capable: {}. Power mgmt mode enabled: {}.", i, deviceNameStr, cuda_capable, pmm_capable);
 		/*
 
 		// Get the compute mode of the device which indicates CUDA capabilities.
@@ -81,8 +119,24 @@ void print_nv_devices_info() {
 		error("Failed to shut down NVML: {}", nvmlErrorString(nvmlResult));
 		return;
 	}
-
 }
+
+bool measure_nv_device_power(int devid, int time, unsigned int* r) {
+	if (!nvmlInitialized)
+	{
+		error("NVML is not initialized.");
+		return false;
+	}
+	nvmlResult = nvmlDeviceGetHandleByIndex(devid, &nvmlDeviceID);
+	if (nvmlResult != NVML_SUCCESS) {
+		error("Could not get handle for device id {}. NVML returned result code: {}.", devid, nvmlResult);
+		return false;
+	}
+	nvmlResult = nvmlDeviceGetPowerManagementMode(nvmlDeviceID, &pmmode);
+	nvmlResult = nvmlDeviceGetPowerUsage(nvmlDeviceID, r);
+	return NVML_SUCCESS == nvmlResult;
+}
+
 /*
 Poll the GPU using nvml APIs.
 */

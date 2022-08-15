@@ -251,7 +251,7 @@ void get_info(const string subsystem) {
 	#endif
 }
 
-void measure(const string* subsystem, int time) {
+void measure(const string* subsystem, const string* devid, int time) {
 	//init(0);
 	if (*subsystem == "rapl") {
 		enumerate_cpus();
@@ -277,6 +277,16 @@ void measure(const string* subsystem, int time) {
 		global_sample_power();
 		info("Energy usage for {}s: {}J.", time, global_joules());
 	}
+	#ifdef CUDAToolkit_FOUND
+	else if (*subsystem == "nv") {
+		init_nvml();
+		unsigned int r = -1;
+		measure_nv_device_power(0, 0, &r);
+		shutdown_nvml();
+		info("Power: {}", r);
+		//print_nv_devices_info();
+	}
+	#endif
 
 }
 
@@ -286,7 +296,7 @@ int main(int argc, char *argv[])
 	Figlet::small.print("pwrmd");
 	try
 	{
-		CmdLine cmdline("libpwrm is a embeddable library for measuring power usage by hardware devices.", ' ', "0.1", true);
+		CmdLine cmdline("pwrm is a program for measuring and reporting power usage by hardware devices in .", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info"};
 		ValuesConstraint<string> cmds(_cmds);
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
@@ -298,10 +308,12 @@ int main(int argc, char *argv[])
 		vector<string> _systems {"hw", "rapl", "cpu", "meter"};
 		#endif
 		ValuesConstraint<string> systems(_systems);
-		UnlabeledValueArg<string> subsystem("sys", "The subsystem or device to measure or report on.     \
-		\nrapl - Intel Running Average Power Limit.     \
-		\nusb - USB.", true, "hw", &systems, cmdline, false);
+		UnlabeledValueArg<string> subsystem("subsystem", "The subsystem or device to measure or report on.     \
+		\nhw - Hardware devices detected by the operating system.                                           \
+		\nrapl - Intel Running Average Power Limit CPU hardware interface.     \
+		\nmeter - ACPI or other power meters.", true, "hw", &systems, cmdline, false);
 		ValueArg<int> time_arg("t", "time","Time in seconds to measure power usage. Default is 10 seconds.",false, 100, "integer", cmdline);
+		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "integer", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -316,7 +328,7 @@ int main(int argc, char *argv[])
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {
-			measure(&subsystem.getValue(), time_arg.getValue());
+			measure(&subsystem.getValue(), &devid_arg.getValue(), time_arg.getValue());
 		}
 
 		clean_shutdown();

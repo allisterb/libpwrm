@@ -284,24 +284,23 @@ void measure(const string* subsystem, const string* devid, int time) {
 	else if (*subsystem == "nv") {
 		init_nvml();
 		unsigned int r = -1;
-		char* name;
-		measure_nv_device_power(atoi(devid->c_str()), 0, name, &r);
-		//info("GPU Device #{}: {}.", devid, name);
-		measurements[string(name)] = r / 1000.0;
+		string name = "";
+		measure_nv_device_power(atoi(devid->c_str()), 0, &name, &r);
+		info("GPU Device #{}: {}.", *devid, name);
+		measurements[name] = r / 1000.0;
 		shutdown_nvml();
 		info("Power draw: {:03.2f}W.", r / 1000.0);
 	}
 	#endif
-
 }
 
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
-	Figlet::small.print("pwrmd");
+	Figlet::small.print("pwrm");
 	try
 	{
-		CmdLine cmdline("pwrm is a program for measuring and reporting power usage by hardware devices in real-time.", ' ', "0.1", true);
+		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info"};
 		ValuesConstraint<string> cmds(_cmds);
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
@@ -313,10 +312,14 @@ int main(int argc, char *argv[])
 		vector<string> _systems {"hw", "rapl", "meter"};
 		#endif
 		ValuesConstraint<string> systems(_systems);
-		UnlabeledValueArg<string> subsystem("subsystem", "The subsystem or device to measure or report on.     \
-		\nhw - Hardware devices detected by the operating system.                                           \
-		\nrapl - Intel Running Average Power Limit CPU hardware interface.     \
-		\nmeter - ACPI or other power meters.", true, "hw", &systems, cmdline, false);
+		UnlabeledValueArg<string> subsystem("subsystem", "The subsystem or device to measure or report on.\
+		\nhw - Hardware devices detected by the operating system.\
+		\nrapl - Intel Running Average Power Limit (RAPL).\
+		\nmeter - ACPI or other power meters." 
+		#ifdef CUDAToolkit_FOUND
+		+ string("\nnv - NVIDIA GPUs.")
+		#endif
+		,true, "hw", &systems, cmdline, false);
 		ValueArg<int> time_arg("t", "time","Time in seconds to measure power usage. Default is 10 seconds.",false, 100, "integer", cmdline);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);

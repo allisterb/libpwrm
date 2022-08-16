@@ -145,7 +145,7 @@ void sysfs_power_meters_callback(const char *d_name)
 	meter = new(std::nothrow) class sysfs_power_meter(d_name);
 	if (meter) {
 		power_meters.push_back(meter);
-		info("Detected power meter {}.", d_name);
+		info("Detected power supply power meter {}.", d_name);
 	}
 }
 
@@ -172,7 +172,7 @@ void sysfs_opal_sensors_callback(const char *d_name)
 	meter = new(std::nothrow) class opal_sensors_power_meter(d_name);
 	if (meter) {
 		power_meters.push_back(meter);
-		info("Detected power meter {}.", d_name);
+		info("Detected OPAL power meter {}.", d_name);
 	}
 }
 

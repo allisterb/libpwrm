@@ -102,7 +102,7 @@ void print_nv_devices_info() {
 	}
 }
 
-bool measure_nv_device_power(int devid, int time, char* name, unsigned int* r) {
+bool measure_nv_device_power(int devid, int time, string* name, unsigned int* r) {
 	if (!nvmlInitialized)
 	{
 		error("NVML is not initialized.");
@@ -116,10 +116,10 @@ bool measure_nv_device_power(int devid, int time, char* name, unsigned int* r) {
 	nvmlResult = nvmlDeviceGetName(nvmlDeviceID, deviceNameStr, sizeof(deviceNameStr)/sizeof(deviceNameStr[0]));
 	if (NVML_SUCCESS != nvmlResult) {
 		error("Failed to get name of device {}: {}", devid, nvmlErrorString(nvmlResult));
-		name = "";
+		*name = "";
 	}
 	else {
-		name = deviceNameStr;
+		*name = string(deviceNameStr);
 	}
 	nvmlResult = nvmlDeviceGetPowerUsage(nvmlDeviceID, r);
 	return NVML_SUCCESS == nvmlResult;

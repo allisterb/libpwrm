@@ -307,6 +307,54 @@ void measure(const string* subsystem, const string* devid) {
 	#endif
 }
 
+void daemon(const string* subsystem, const string* devid) {
+	if (*subsystem == "rapl") {
+		enumerate_cpus();
+		create_all_devices();
+		if (!get_rapl_device_present())
+		{
+			return;
+		}
+		
+		info("Measuring CPU power usage using Intel RAPL interface...");
+		start_rapl_cpu_measurement();
+		auto p = end_rapl_cpu_measurement();
+		measurements["rapl"] = p;
+		info("Power usage {:03.2f}W.", p);
+	}
+	else if (*subsystem == "meter")
+	{
+		detect_power_meters();
+		start_power_measurement();
+		end_power_measurement();
+		auto p = global_power();
+		measurements["meter"] = p;
+		info("System power usage: {:03.2f}W", p);
+		
+	}
+	#ifdef CUDAToolkit_FOUND
+	else if (*subsystem == "nv") {
+		info ("Measuring NVIDIA GPU device #{} power usage...", *devid);
+		
+		info("Starting daemon....");
+		while (true) {		
+			cout << "\nDaemon running...press any key to exit.\n" << flush;
+			unsigned int r = -1;
+			string name = "";
+			init_nvml();
+			measure_nv_device_power(atoi(devid->c_str()), 0, &name, &r);
+			shutdown_nvml();
+			info("GPU Device #{}: {}.", *devid, name);
+			auto p = r / 1000.0;
+			measurements[name] = p;
+			info("Power usage: {:03.2f}W.", p);
+			if (iskeypressed( 5000 )) break;
+		}
+		
+	}
+	#endif
+}
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -359,11 +407,7 @@ int main(int argc, char *argv[])
 		}
 
 		else if (cmd.getValue() == "daemon") {
-
-			while (true) {
-      			cout << "Zzz..." << flush;
-      			if (iskeypressed( 500 )) break;
-      		}
+			daemon(&subsystem.getValue(), &devid_arg.getValue());
 		}
 
 		clean_shutdown();

@@ -42,6 +42,7 @@ bool shutdown_nvml()
 		return false;
 	}
 	else {
+		nvmlInitialized = false;
 		return true;
 	}
 }

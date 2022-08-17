@@ -251,7 +251,7 @@ void get_info(const string subsystem) {
 	#endif
 }
 
-void measure(const string* subsystem, const string* devid, int time) {
+void measure(const string* subsystem, const string* devid) {
 	//init(0);
 	std::map<string, double> measurements;
 	if (*subsystem == "rapl") {
@@ -262,36 +262,19 @@ void measure(const string* subsystem, const string* devid, int time) {
 			return;
 		}
 		
-		info("Measuring CPU power usage for {} seconds using Intel RAPL interface...", time);
+		info("Measuring CPU power usage using Intel RAPL interface...");
 		start_rapl_cpu_measurement();
-		sleep(time);
 		auto p = end_rapl_cpu_measurement();
 		measurements["rapl"] = p;
-		info("Power usage {}.", p);
+		info("Power usage {:03.2f}W.", p);
 	}
 	else if (*subsystem == "meter")
 	{
 		detect_power_meters();
-		info("Measuring system power usage for {}s with sample interval 5s using power meter...", time);
-		int sample_interval = 5;
-		struct timespec tlast;
-		struct timespec tnow;
-		double joules = 0.0;
 		start_power_measurement();
-		while (time > 0)
-		{
-			sleep(sample_interval > time ? time : sample_interval);
-			time -= sample_interval;
-			clock_gettime(CLOCK_REALTIME, &tnow);
-	        /* power * time = joules */
-	        joules += global_power() * \
-			 ( ((double)tnow.tv_sec + 1.0e-9*tnow.tv_nsec) - \
-			   ((double)tlast.tv_sec + 1.0e-9*tlast.tv_nsec));
-			tlast = tnow;
-		}
 		end_power_measurement();
-		measurements["meter"] = joules;
-		info("Electricity consumption for {}s: {}Wh", time, joules);
+		info("System power usage: {:03.2f}W", global_power());
+		
 	}
 	#ifdef CUDAToolkit_FOUND
 	else if (*subsystem == "nv") {
@@ -302,7 +285,7 @@ void measure(const string* subsystem, const string* devid, int time) {
 		info("GPU Device #{}: {}.", *devid, name);
 		measurements[name] = r / 1000.0;
 		shutdown_nvml();
-		info("Power draw: {:03.2f}W.", r / 1000.0);
+		info("Power usage: {:03.2f}W.", r / 1000.0);
 	}
 	#endif
 }
@@ -333,7 +316,6 @@ int main(int argc, char *argv[])
 		+ string("\nnv - NVIDIA GPUs.")
 		#endif
 		,true, "hw", &systems, cmdline, false);
-		ValueArg<int> time_arg("t", "time","Time in seconds to measure power usage. Default is 10 seconds.",false, 100, "integer", cmdline);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
 		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is report-base.json.", false, "report-base.json", "string", cmdline);
@@ -351,7 +333,7 @@ int main(int argc, char *argv[])
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {
-			measure(&subsystem.getValue(), &devid_arg.getValue(), time_arg.getValue());
+			measure(&subsystem.getValue(), &devid_arg.getValue());
 		}
 
 		clean_shutdown();

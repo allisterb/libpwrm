@@ -47,7 +47,6 @@ bool shutdown_nvml()
 }
 
 void print_nv_devices_info() {
-	info ("Printing NVIDIA GPU devices info...");
 	nvmlResult = nvmlInit();
 	if (NVML_SUCCESS != nvmlResult)
 	{

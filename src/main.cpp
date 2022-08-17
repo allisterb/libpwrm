@@ -12,6 +12,9 @@
 #include <limits.h>
 #include <pthread.h>
 
+#include <termios.h>
+#include <poll.h>
+
 #include "cpu/cpu.h"
 #include "process/process.h"
 #include "perf/perf.h"
@@ -47,10 +50,10 @@
 using namespace spdlog;
 using namespace TCLAP;
 
-
 bool debug_enabled = false; 
 int debug_learning = 0;
 bool is_root = false;
+std::map<string, double> measurements;
 
 extern "C" {
 	static volatile bool end_thread;
@@ -216,6 +219,16 @@ void one_measurement(int seconds, int sample_interval, char *workload)
 	end_cpu_data();
 }
 
+bool iskeypressed( unsigned timeout_ms = 0 )
+  {
+  //if (!initialized) return false;
+
+  struct pollfd pls[ 1 ];
+  pls[ 0 ].fd     = STDIN_FILENO;
+  pls[ 0 ].events = POLLIN | POLLPRI;
+  return poll( pls, 1, timeout_ms ) > 0;
+  }
+
 void get_info(const string subsystem) {
 	if (subsystem == "hw") {
 		create_all_devices();
@@ -246,14 +259,14 @@ void get_info(const string subsystem) {
 	}
 	#ifdef CUDAToolkit_FOUND
 	else if (subsystem == "nv") {
+		info ("Printing NVIDIA GPU devices info...");
 		print_nv_devices_info();
 	}
 	#endif
 }
 
 void measure(const string* subsystem, const string* devid) {
-	//init(0);
-	std::map<string, double> measurements;
+	
 	if (*subsystem == "rapl") {
 		enumerate_cpus();
 		create_all_devices();
@@ -273,19 +286,23 @@ void measure(const string* subsystem, const string* devid) {
 		detect_power_meters();
 		start_power_measurement();
 		end_power_measurement();
-		info("System power usage: {:03.2f}W", global_power());
+		auto p = global_power();
+		measurements["meter"] = p;
+		info("System power usage: {:03.2f}W", p);
 		
 	}
 	#ifdef CUDAToolkit_FOUND
 	else if (*subsystem == "nv") {
+		info ("Printing NVIDIA GPU device #{} power usage...", *devid);
 		init_nvml();
 		unsigned int r = -1;
 		string name = "";
 		measure_nv_device_power(atoi(devid->c_str()), 0, &name, &r);
 		info("GPU Device #{}: {}.", *devid, name);
-		measurements[name] = r / 1000.0;
+		auto p = r / 1000.0;
+		measurements[name] = p;
 		shutdown_nvml();
-		info("Power usage: {:03.2f}W.", r / 1000.0);
+		info("Power usage: {:03.2f}W.", p);
 	}
 	#endif
 }
@@ -297,7 +314,7 @@ int main(int argc, char *argv[])
 	try
 	{
 		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
-		vector<string> _cmds {"measure", "info"};
+		vector<string> _cmds {"measure", "info", "daemon"};
 		ValuesConstraint<string> cmds(_cmds);
 		UnlabeledValueArg<string> cmd("cmd", "The command to run.    \
 		\nmeasure - Measure power consumption for the particular subsystem or device.     \
@@ -318,7 +335,7 @@ int main(int argc, char *argv[])
 		,true, "hw", &systems, cmdline, false);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
-		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is report-base.json.", false, "report-base.json", "string", cmdline);
+		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is data/report-base.json.", false, "../data/report-base.json", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -334,6 +351,19 @@ int main(int argc, char *argv[])
 		}
 		else if (cmd.getValue() == "measure") {
 			measure(&subsystem.getValue(), &devid_arg.getValue());
+			if (report_arg.getValue())
+			{
+				report(&base_report_arg.getValue(), measurements);
+
+			}
+		}
+
+		else if (cmd.getValue() == "daemon") {
+
+			while (true) {
+      			cout << "Zzz..." << flush;
+      			if (iskeypressed( 500 )) break;
+      		}
 		}
 
 		clean_shutdown();

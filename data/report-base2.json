@@ -1,0 +1,9 @@
+{
+    "minerID": "test1",
+    "date": "",
+    "location": {
+        "lat": 0.0,
+        "long": 0.0
+    },
+    "devices":[]
+}

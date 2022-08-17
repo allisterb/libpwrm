@@ -4,6 +4,12 @@
     "description": "Hardware power usage",
     "type": "object",
     "properties": {
+        "minerID" : { 
+            "type": "string"
+        },
+        "date": {
+            "type": "string"
+        },
         "location": {
             "type": "object",
             "properties": {

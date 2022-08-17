@@ -196,6 +196,8 @@ void extech_power_meter(const char *devnode)
 
 void print_power_meter_info()
 {
+	start_power_measurement();
+	end_power_measurement();
 	for (uint i = 0; i < power_meters.size(); i++) {
 		info("Power meter index: {}.", i);
 		info("Device capacity: {}mWh.", power_meters[i]->dev_capacity());

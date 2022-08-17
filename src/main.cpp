@@ -272,13 +272,26 @@ void measure(const string* subsystem, const string* devid, int time) {
 	else if (*subsystem == "meter")
 	{
 		detect_power_meters();
-		info("Measuring system power usage for {} seconds using power meter...", time);
+		info("Measuring system power usage for {}s with sample interval 5s using power meter...", time);
+		int sample_interval = 5;
+		struct timespec tlast;
+		struct timespec tnow;
+		double joules = 0.0;
 		start_power_measurement();
-		sleep(time);
+		while (time > 0)
+		{
+			sleep(sample_interval > time ? time : sample_interval);
+			time -= sample_interval;
+			clock_gettime(CLOCK_REALTIME, &tnow);
+	        /* power * time = joules */
+	        joules += global_power() * \
+			 ( ((double)tnow.tv_sec + 1.0e-9*tnow.tv_nsec) - \
+			   ((double)tlast.tv_sec + 1.0e-9*tlast.tv_nsec));
+			tlast = tnow;
+		}
 		end_power_measurement();
-		global_sample_power();
-		measurements["meter"] = global_power();
-		info("Energy usage for {}s: {}J.", time, global_joules());
+		measurements["meter"] = joules;
+		info("Electricity consumption for {}s: {}Wh", time, joules);
 	}
 	#ifdef CUDAToolkit_FOUND
 	else if (*subsystem == "nv") {

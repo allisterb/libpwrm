@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 		,true, "hw", &systems, cmdline, false);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
-		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is data/report-base.json.", false, "../data/report-base.json", "string", cmdline);
+		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is data/report-base.json.", false, "data/report-base.json", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);

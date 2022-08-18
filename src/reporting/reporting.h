@@ -4,6 +4,8 @@
 #include "../lib.h"
 #include "../json.hpp"
 #include <fstream>
+#include<iostream>
+#include<sstream>
 #include <ctime>
 
 #include "../devices/device.h"

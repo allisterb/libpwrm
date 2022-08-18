@@ -7,11 +7,22 @@ void report(const string* base_file, std::map<string, double> measurements)
 {
     info("Loading base reporting data file {}...", *base_file);
     std::ifstream f(*base_file);
-    if (!f.good()) {
+    //if (!f.good()) {
+    //  error("Could not open file {} for reading.", *base_file);
+    //  return;
+    //}
+    string str = "";
+    if(f) {
+      ostringstream ss;
+      ss << f.rdbuf(); // reading data
+      f.close();
+      str = ss.str();
+    }
+    else {
       error("Could not open file {} for reading.", *base_file);
       return;
     }
-    json data = json::parse(f);
+    json data = json::parse(str);
 
     
     time_t now = time(0);

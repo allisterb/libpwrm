@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/pwrm_cli",
-            "args": ["measure", "nv", "-r"],
+            "args": ["measure", "nv", "-r", "--report-base", "../data/report-base.json", "--did", "z6MkgoS2e1R2WFCmhwLtgrWFeVYkh5eJZGK7dJgnQn3dSVTr", "-d"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

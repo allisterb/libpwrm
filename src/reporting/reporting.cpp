@@ -3,18 +3,14 @@
 using json = nlohmann::json;
 
 
-void report(const string* base_file, std::map<string, double> measurements)
+void report(const string* base_file,  std::vector<string> devices,  std::map<string, double> measurements)
 {
     info("Loading base reporting data file {}...", *base_file);
     std::ifstream f(*base_file);
-    //if (!f.good()) {
-    //  error("Could not open file {} for reading.", *base_file);
-    //  return;
-    //}
     string str = "";
     if(f) {
       ostringstream ss;
-      ss << f.rdbuf(); // reading data
+      ss << f.rdbuf(); 
       f.close();
       str = ss.str();
     }
@@ -28,8 +24,10 @@ void report(const string* base_file, std::map<string, double> measurements)
     time_t now = time(0);
     string dt = ctime(&now);
     data["date"] = dt;
+    data["devices"] = devices;
+    data["measurements"] = measurements;
     std::string s = data.dump(); 
-    f.close();
+    debug("JSON data document:{}", s);
     //json data = R"(
   //{
   //  "location": {

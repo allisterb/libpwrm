@@ -266,7 +266,8 @@ void get_info(const string subsystem) {
 }
 
 void measure(const string* subsystem, const string* devid) {
-	
+	create_all_devices();
+	create_all_usb_devices();
 	if (*subsystem == "rapl") {
 		enumerate_cpus();
 		create_all_devices();
@@ -384,6 +385,8 @@ int main(int argc, char *argv[])
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
 		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is data/report-base.json.", false, "data/report-base.json", "string", cmdline);
+		ValueArg<string> ceramic_arg("c", "ceramic","The Ceramic HTTP API URL, if any. ",false, "", "string", cmdline);
+		ValueArg<string> did_arg("", "did","The DID key to use to sign the report, if any. ",false, "", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -401,8 +404,11 @@ int main(int argc, char *argv[])
 			measure(&subsystem.getValue(), &devid_arg.getValue());
 			if (report_arg.getValue())
 			{
-				report(&base_report_arg.getValue(), measurements);
-
+				std::vector<string> devices;
+    			for (ulong i = 0; i < all_devices.size(); i++) {
+					devices.push_back(all_devices[i]->human_name());
+    			}
+				report(&base_report_arg.getValue(), devices, measurements);
 			}
 		}
 

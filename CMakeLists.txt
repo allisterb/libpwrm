@@ -69,6 +69,7 @@ set(pwrm_headers
     ${devices_headers}
     ${cpu_headers}
     ${nvmlpower_headers}
+    src/httplib.h
     src/reporting/reporting.h
     src/devlist.h
     src/lib.h

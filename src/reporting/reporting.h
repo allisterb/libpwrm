@@ -8,8 +8,9 @@
 #include<sstream>
 #include <ctime>
 
+#include "../httplib.h"
 #include "../devices/device.h"
 
-void report(const string* base_file, std::map<string, double> measurements);
+void report(const string* base_file, std::vector<string> devices, std::map<string, double> measurements);
 
 #endif

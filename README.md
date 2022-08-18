@@ -1,4 +1,4 @@
-#About
+# About
 libpwrm is an embeddable library, CLI app and daemon for realtime, decentralized measuring and reporting on CPU and GPU hardware electricity consumption by blockchain nodes without requiring specialized hardware power meters. libpwrm provides software-based continuous monitoring of different hardware power consumption interfaces and automatic reporting of the measurement data to the [Ceramic](https://ceramic.network/) data network.
 
 libpwrm can [read](https://github.com/allisterb/libpwrm/blob/master/src/measurement/measurement.cpp) power consumption data from [different hardware power meters](https://github.com/allisterb/libpwrm/tree/master/src/measurement) including laptop power supply meters. It can also [read](https://github.com/allisterb/libpwrm/tree/master/src/cpu) CPU power consumption data from Intel's Running Average Power Limit – [RAPL](https://01.org/blogs/2014/running-average-power-limit-%E2%80%93-rapl) interface which uses power metering builtin to Intel CPUs, and NVIDIA GPU power consumption data using the builtin GPU power meters and the [NVML](https://developer.nvidia.com/nvidia-management-library-nvml) interface.

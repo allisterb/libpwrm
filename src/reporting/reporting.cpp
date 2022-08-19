@@ -2,7 +2,6 @@
 
 using json = nlohmann::json;
 
-
 void report(const string* base_file,  std::vector<string> devices,  std::map<string, double> measurements, const string* ceramic_url, const string* did)
 {
     info("Loading base reporting data file {}...", *base_file);
@@ -19,7 +18,6 @@ void report(const string* base_file,  std::vector<string> devices,  std::map<str
       return;
     }
     json data = json::parse(str);
-
     
     time_t now = time(0);
     string dt = ctime(&now);
@@ -34,7 +32,7 @@ void report(const string* base_file,  std::vector<string> devices,  std::map<str
         "header": {
           "family": "test"
         },
-        "pwr": 
+        "Document": 
             )" + data.dump() + "} }";
     
     data = json::parse(body); 
@@ -45,9 +43,10 @@ void report(const string* base_file,  std::vector<string> devices,  std::map<str
 
     // HTTPS
     httplib::Client client(*ceramic_url);
+    info("Posting TileDocument using Ceramic API at {}...", *ceramic_url);
     if (auto res = client.Post("/api/v0/streams", data.dump(), "application/json")) {
       if (res->status == 200) {
-        std::cout << res->body << std::endl;
+        info("API response: {}", res->body);
       }
     } else {
       auto err = res.error();

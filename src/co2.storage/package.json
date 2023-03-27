@@ -1,0 +1,20 @@
+{
+	"name": "libpwrm-co2storage",
+	"version": "0.0.1",
+	"description": "Store power usage data on Protocol Labs CO2.Storage service.",
+	"type": "module",
+	"author": {
+		"name": "Allister Beharry",
+		"email": "none@anonservice.pk"
+	},
+	"devDependencies": {
+		"env-cmd": "^10.1.0"
+	},
+	"scripts": {
+		"add_asset": "env-cmd node add_asset.js"		
+	},
+	"dependencies": {
+		"@co2-storage/js-api": "^1.1.38",
+		"fs": "^0.0.1-security"
+	}
+}

@@ -1,5 +1,6 @@
 import { FGStorage } from '@co2-storage/js-api'
 import fs from 'fs'
+import { program } from 'commander'
 
 const authType = "pk"
 const ipfsNodeType = "client"
@@ -10,6 +11,17 @@ const fgApiUrl = "https://co2.storage"
 
 const fgStorage = new FGStorage({authType: authType, ipfsNodeType: ipfsNodeType, ipfsNodeAddr: ipfsNodeAddr, fgApiHost: fgApiUrl})
 
+program
+  .name('co2.storage')
+  .description('Store power usage data on Protocol Labs CO2.Storage service.')
+  .version('0.8.1');
+
+program.command('upload')
+  .description('Upload a data file to CO2.Storage')
+  .argument('<string>', 'file to upload')
+  .option('-t, --template <string>', 'The CO2.Storage template to use to upload the data.');
+
+program.parse()
 /**
  * Add asset
  * parameters: { options } -> (assetElements:json, asset parent:string(CID), asset name:string, asset template:string(CID),
@@ -90,8 +102,10 @@ const fgStorage = new FGStorage({authType: authType, ipfsNodeType: ipfsNodeType,
 }
  */
 
-const docPath = './assets/test document.pdf'
-const imgPath = './assets/test image.jpg'
+//const docPath = './assets/test document.pdf'
+//const imgPath = './assets/test image.jpg'
+
+/*
 const doc = fs.readFileSync(docPath)
 const img = fs.readFileSync(imgPath)
 
@@ -187,7 +201,8 @@ const assetElements = [
         "value": null
     }
 ]
-
+*/
+const assetElements  = [];
 let addAssetResponse = await fgStorage.addAsset(
     assetElements,
     {

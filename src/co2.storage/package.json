@@ -11,10 +11,11 @@
 		"env-cmd": "^10.1.0"
 	},
 	"scripts": {
-		"add_asset": "env-cmd node add_asset.js"		
+		"co2.storage": "env-cmd node co2.storage.js"
 	},
 	"dependencies": {
 		"@co2-storage/js-api": "^1.1.38",
+		"commander": "^10.0.0",
 		"fs": "^0.0.1-security"
 	}
 }

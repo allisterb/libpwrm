@@ -2,6 +2,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
+#include <filesystem>
 #include <time.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
@@ -11,7 +12,7 @@
 #include <sys/resource.h>
 #include <limits.h>
 #include <pthread.h>
-
+#include <unistd.h>
 #include <termios.h>
 #include <poll.h>
 
@@ -42,6 +43,7 @@
 #include "Figlet.hh"
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
+#include "subprocess.hpp"
 
 #define DEBUGFS_MAGIC          0x64626720
 
@@ -49,6 +51,8 @@
 
 using namespace spdlog;
 using namespace TCLAP;
+//using namespace std::filesystem;
+namespace sp=subprocess;
 
 bool debug_enabled = false; 
 int debug_learning = 0;
@@ -371,6 +375,8 @@ int main(int argc, char *argv[])
 	Figlet::small.print("pwrm");
 	try
 	{
+		//info("path is {}, {}", argv[0], realpath("/proc/self/exe"));
+		auto obuf = sp::check_output({"ls", "-l"}, sp::shell{false});
 		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info", "daemon"};
 		ValuesConstraint<string> cmds(_cmds);

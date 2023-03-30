@@ -59,7 +59,6 @@ add_subdirectory(src/process)
 add_subdirectory(src/devices)
 add_subdirectory(src/cpu)
 
-
 set(pwrm_headers      
     ${traceevent_headers}
     ${measurement_headers}

@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <termios.h>
 #include <poll.h>
+#include <libgen.h>
 
 #include "cpu/cpu.h"
 #include "process/process.h"
@@ -369,14 +370,41 @@ void daemon(const string* subsystem, const string* devid) {
 	#endif
 }
 
+std::string get_exec_path() {
+   char rawPathName[PATH_MAX];
+   realpath("/proc/self/exe", rawPathName);
+   return  std::string(rawPathName);
+}
+
+std::string get_exec_dir() {
+    std::string executablePath = get_exec_path();
+    char *executablePathStr = new char[PATH_MAX];
+    strcpy(executablePathStr, (executablePath).c_str());
+    char* executableDir = dirname(executablePathStr);
+    delete [] executablePathStr;
+    return std::string(executableDir);
+}
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
 	Figlet::small.print("pwrm");
 	try
 	{
-		//info("path is {}, {}", argv[0], realpath("/proc/self/exe"));
-		auto obuf = sp::check_output({"ls", "-l"}, sp::shell{false});
+		
+		info("path is {}, {}", get_exec_dir(), get_exec_path());
+		//auto obuf = sp::check_output({"node", get_exec_dir() + "/../src/co2.storage"}, sp::shell{false});
+		//info("ls is {}", obuf.buf.data());
+		auto st= sp::Popen({"node", "co2.storage", "--help"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+		st.wait();
+		//fseek(st.output(), 0, SEEK_END);
+    	//auto lSize = ftell(st.output());
+    	//rewind(st.output());
+		//auto buffer = (char*)malloc(sizeof(char)*lSize);
+    
+    // copy the file into the buffer:
+    	//auto result = fread(buffer, 1, lSize, st.output());
+		info("output is {}", st.communicate().first.buf.data());
+		//auto j = std::ifstream(st.output());
 		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info", "daemon"};
 		ValuesConstraint<string> cmds(_cmds);

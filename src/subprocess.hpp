@@ -124,8 +124,8 @@ class CalledProcessError: public std::runtime_error
 {
 public:
   int retcode;
-  CalledProcessError(const std::string& error_msg, int retcode):
-    std::runtime_error(error_msg), retcode(retcode)
+  CalledProcessError(const std::string& error_msg, int _retcode):
+    std::runtime_error(error_msg), retcode(_retcode)
   {}
 };
 
@@ -1248,7 +1248,7 @@ public:
   }
 
   template <typename... Args>
-  Popen(std::vector<std::string> vargs_, Args &&... args) : vargs_(vargs_)
+  Popen(std::vector<std::string> vargs__, Args &&... args) : vargs_(vargs__)
   {
     init_args(std::forward<Args>(args)...);
 

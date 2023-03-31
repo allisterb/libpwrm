@@ -384,27 +384,23 @@ std::string get_exec_dir() {
     delete [] executablePathStr;
     return std::string(executableDir);
 }
+
+void report_co2_storage(std::string json)
+{
+	info("path is {}, {}", get_exec_dir(), get_exec_path());
+	auto st= sp::Popen({"node", "co2.storage", "--help"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	st.wait();
+	info("output is {}", st.communicate().first.buf.data());
+
+}
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
 	Figlet::small.print("pwrm");
 	try
 	{
-		
-		info("path is {}, {}", get_exec_dir(), get_exec_path());
-		//auto obuf = sp::check_output({"node", get_exec_dir() + "/../src/co2.storage"}, sp::shell{false});
-		//info("ls is {}", obuf.buf.data());
-		auto st= sp::Popen({"node", "co2.storage", "--help"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
-		st.wait();
-		//fseek(st.output(), 0, SEEK_END);
-    	//auto lSize = ftell(st.output());
-    	//rewind(st.output());
-		//auto buffer = (char*)malloc(sizeof(char)*lSize);
-    
-    // copy the file into the buffer:
-    	//auto result = fread(buffer, 1, lSize, st.output());
-		info("output is {}", st.communicate().first.buf.data());
-		//auto j = std::ifstream(st.output());
+		report_co2_storage("ll");
 		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info", "daemon"};
 		ValuesConstraint<string> cmds(_cmds);

@@ -10,6 +10,6 @@
 #include "../json.hpp"
 #include "../httplib.h"
 
-void report(const string* base_file, std::vector<string> devices, std::map<string, double> measurements, const string* ceramic_url, const string* did);
+void report(std::vector<string> devices, std::map<string, double> measurements, const string* wt_user, const string* wt_pass);
 
 #endif

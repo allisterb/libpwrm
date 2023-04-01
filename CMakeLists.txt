@@ -20,6 +20,8 @@ endif()
 
 find_package(CUDAToolkit)
 
+find_package(OpenSSL REQUIRED)
+
 if(${CUDAToolkit_FOUND})
     add_compile_definitions(CUDAToolkit_FOUND=${CUDAToolkit_FOUND})
     set(nvmlpower_headers
@@ -117,10 +119,11 @@ if(${CUDAToolkit_FOUND})
 endif()
 
 target_include_directories (pwrm_cli PUBLIC 
+    ${OPENSSL_INCLUDE_DIR}
     ext/spdlog/include
     ext/embedFiglet/src
     ext/tclap-1.2.3/include 
     src
 )
-
-target_link_libraries(pwrm_cli PUBLIC pwrm)
+target_compile_definitions(pwrm_cli PUBLIC CPPHTTPLIB_OPENSSL_SUPPORT)
+target_link_libraries(pwrm_cli PUBLIC pwrm OpenSSL::Crypto OpenSSL::SSL Threads::Threads)

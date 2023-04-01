@@ -2,23 +2,10 @@
 
 using json = nlohmann::json;
 
-void report(const string* base_file,  std::vector<string> devices,  std::map<string, double> measurements, const string* ceramic_url, const string* did)
+void report(std::vector<string> devices,  std::map<string, double> measurements, const string* wt_user, const string* wt_pass)
 {
-    info("Loading base reporting data file {}...", *base_file);
-    std::ifstream f(*base_file);
-    string str = "";
-    if(f) {
-      ostringstream ss;
-      ss << f.rdbuf(); 
-      f.close();
-      str = ss.str();
-    }
-    else {
-      error("Could not open file {} for reading.", *base_file);
-      return;
-    }
+    string str = "";   
     json data = json::parse(str);
-    
     time_t now = time(0);
     string dt = ctime(&now);
     data["date"] = dt;
@@ -34,7 +21,7 @@ void report(const string* base_file,  std::vector<string> devices,  std::map<str
         },
         "Document": 
             )" + data.dump() + "} }";
-    
+    /*
     data = json::parse(body); 
     string k = "did:key:" + (*did);
     string controllers[] = {k};
@@ -51,7 +38,8 @@ void report(const string* base_file,  std::vector<string> devices,  std::map<str
     } else {
       auto err = res.error();
       std::cout << "HTTP error: " << httplib::to_string(err) << std::endl;
-  }
+      */
+  
     //r.
     //json data = R"(
   //{

@@ -99,4 +99,5 @@ extern void (*ui_notify_user) (const char *frmt, ...);
 
 extern bool debug_enabled;
 extern bool is_root;
+extern std::string wattime_token;
 #endif

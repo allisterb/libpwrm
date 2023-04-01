@@ -45,6 +45,8 @@
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
 #include "subprocess.hpp"
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "httplib.h"
 
 #define DEBUGFS_MAGIC          0x64626720
 
@@ -59,6 +61,7 @@ bool debug_enabled = false;
 int debug_learning = 0;
 bool is_root = false;
 std::map<string, double> measurements;
+ // scheme + host
 
 extern "C" {
 	static volatile bool end_thread;
@@ -394,13 +397,34 @@ void report_co2_storage(std::string json)
 
 }
 
+void get_emissions()
+{
+
+}
+
+std::string get_wattime_login(const std::string username, const std::string password)
+{
+	
+	httplib::Client cli("https://api2.watttime.org");
+	cli.set_basic_auth(username, password);
+	auto res = cli.Get("/v2/login");
+	if (res->status == 200)
+	{
+		return res->body;
+	} 
+	else
+	{
+		error("Call to refresh WattTime auth token at https://api2.watttime.org/v2/login did not succeed. Status code: {}.", res->status);
+		return "";
+	}
+
+}
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
 	Figlet::small.print("pwrm");
 	try
 	{
-		report_co2_storage("ll");
 		CmdLine cmdline("pwrm is a program for measuring and reporting power consumption by hardware devices in real-time.", ' ', "0.1", true);
 		vector<string> _cmds {"measure", "info", "daemon"};
 		ValuesConstraint<string> cmds(_cmds);
@@ -422,10 +446,9 @@ int main(int argc, char *argv[])
 		#endif
 		,true, "hw", &systems, cmdline, false);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
-		SwitchArg report_arg("r", "report","Report the power measurement data using the specified base report data file.", cmdline, false);
-		ValueArg<string> base_report_arg("", "report-base", "The base report data file. Default is data/report-base.json.", false, "data/report-base.json", "string", cmdline);
-		ValueArg<string> ceramic_arg("c", "ceramic","The Ceramic HTTP API URL, if any. ",false, "http://localhost:7007", "string", cmdline);
-		ValueArg<string> did_arg("", "did","The DID key to use to sign the report, if any. ",false, "", "string", cmdline);
+		SwitchArg report_arg("r", "report","Report the power measurement data using the CO2.storage service.", cmdline, false);
+		ValueArg<string> wt_user_arg("", "wt-user", "The WattTime API user.", false, "", "string", cmdline);
+		ValueArg<string> wt_pass_arg("", "wt-pass", "The WattTime API password.", false, "", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -436,6 +459,9 @@ int main(int argc, char *argv[])
 			spdlog::set_level(spdlog::level::debug);
 			info("Debug mode enabled.");
 		}
+		auto t = get_wattime_login(wt_user_arg.getValue(), wt_pass_arg.getValue());
+		info("WattTime API token is {}", t);
+		exit(0);
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
 		}
@@ -447,7 +473,7 @@ int main(int argc, char *argv[])
     			for (ulong i = 0; i < all_devices.size(); i++) {
 					devices.push_back(all_devices[i]->human_name());
     			}
-				report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
+				report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
 			}
 		}
 
@@ -473,7 +499,7 @@ int main(int argc, char *argv[])
 					info("CPU Power usage {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
+						report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
 					}
 					if (iskeypressed( 5000 )) break;
 				}
@@ -492,7 +518,7 @@ int main(int argc, char *argv[])
 					info("System power usage: {:03.2f}W", p);
 					if (report_arg.getValue())
 					{
-						report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
+						report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
 					}
 					if (iskeypressed( 5000 )) break;
 				}

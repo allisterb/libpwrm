@@ -45,7 +45,6 @@
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
 #include "subprocess.hpp"
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "httplib.h"
 
 #define DEBUGFS_MAGIC          0x64626720
@@ -54,8 +53,8 @@
 
 using namespace spdlog;
 using namespace TCLAP;
-//using namespace std::filesystem;
 namespace sp=subprocess;
+using json = nlohmann::json;
 
 bool debug_enabled = false; 
 int debug_learning = 0;
@@ -388,7 +387,7 @@ std::string get_exec_dir() {
     return std::string(executableDir);
 }
 
-void report_co2_storage(std::string json)
+void report_co2_storage(std::string xjson)
 {
 	info("path is {}, {}", get_exec_dir(), get_exec_path());
 	auto st= sp::Popen({"node", "co2.storage", "--help"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
@@ -397,28 +396,55 @@ void report_co2_storage(std::string json)
 
 }
 
-void get_emissions()
-{
-
-}
 
 std::string get_wattime_login(const std::string username, const std::string password)
 {
-	
 	httplib::Client cli("https://api2.watttime.org");
 	cli.set_basic_auth(username, password);
 	auto res = cli.Get("/v2/login");
 	if (res->status == 200)
 	{
+		json data = json::parse(res->body);
+		debug("WattTime API returned token: {}", data["token"].dump());
+		return data["token"].get<std::string>();
+	} 
+	else
+	{
+		error("Call to refresh WattTime auth token at https://api2.watttime.org/v2/login did not succeed. HTTP status code: {}.", res->status);
+		return "";
+	}
+}
+
+std::string get_emissions(const std::string wt_token, const float lat, const float lon)
+{
+	httplib::Client cli("https://api2.watttime.org");
+	debug("Token is {}", wt_token);
+	debug("Sleeping for 2 seconds after token refresh.");
+    sleep(2);
+	//cli.set_bearer_token_auth(wt_token);
+	//cli.
+	//cli.se
+	cli.set_default_headers(httplib::Headers {{ "Authorization", ("Bearer " + wt_token) }, {"Accept", "*/*"}, {"User-Agent", "libpwrm"}});
+	auto res = cli.Get("/v2/index?ba=CAISO_NORTH");// + std::to_string(lat) + "&longitude=" + std::to_string(lon) + "&style=percent");
+	if (res->status==403)
+	{
+		debug("Sleeping for 2 seconds after token refresh.");
+		sleep(2);
+		res = cli.Get("/v2/index?ba=CAISO_NORTH");
+	}
+	if (res->status == 200)
+	{
+		debug("Call to WattTime index endpoint returned {}.", res->body);
 		return res->body;
 	} 
 	else
 	{
-		error("Call to refresh WattTime auth token at https://api2.watttime.org/v2/login did not succeed. Status code: {}.", res->status);
+		error("Call to WattTime index endpoint at https://api2.watttime.org/v2/index did not succeed. HTTP status code: {}.", res->status);
 		return "";
 	}
 
 }
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -461,6 +487,8 @@ int main(int argc, char *argv[])
 		}
 		auto t = get_wattime_login(wt_user_arg.getValue(), wt_pass_arg.getValue());
 		info("WattTime API token is {}", t);
+		auto ind = get_emissions(t, 42.372, -72.519);
+		info("WattTime emissions is {}.", ind);
 		exit(0);
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());

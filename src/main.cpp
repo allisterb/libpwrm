@@ -62,7 +62,7 @@ bool debug_enabled = false;
 int debug_learning = 0;
 bool is_root = false;
 std::map<string, double> measurements;
-
+std::string wt_token = "";
  // scheme + host
 
 extern "C" {
@@ -415,7 +415,7 @@ std::string get_wt_auth_token(const std::string username, const std::string pass
 	}
 }
 
-std::string get_wt_moer(std::string wt_token, const std::string wt_ba)
+std::string get_wt_moer(const std::string wt_ba)
 {
 	httplib::Client cli("https://api2.watttime.org");
 	debug("Token is {}", wt_token);
@@ -428,7 +428,8 @@ std::string get_wt_moer(std::string wt_token, const std::string wt_ba)
 	else if (res->status == 200)
 	{
 		debug("Call to WattTime index endpoint returned {}.", res->body);
-		return res->body;
+		auto j = json::parse(res->body);
+		return j["moer"].get<std::string>();
 	} 
 	else
 	{
@@ -439,14 +440,20 @@ std::string get_wt_moer(std::string wt_token, const std::string wt_ba)
 
 void report(std::vector<string> devices,  std::map<string, double> measurements, int duration, const string wt_user, const string wt_pass, const string wt_ba)
 {
-	std::string wt_token = get_wt_auth_token(wt_user, wt_pass);
-	auto moer = get_wt_moer(wt_token, wt_ba);
+	auto m = measurements.begin()->second;
+	if (wt_token.empty())
+	{
+		wt_token = get_wt_auth_token(wt_user, wt_pass);
+	}
+	auto moer = get_wt_moer(wt_ba);
 	if (moer == "refresh")
 	{
 		wt_token = get_wt_auth_token(wt_user, wt_pass);
-		moer = get_wt_moer(wt_token, wt_ba);
+		moer = get_wt_moer(wt_ba);
 	}
-	info("moer {}", moer);
+	info("WattTime MOER for BA {} is {:03.2f} CO2 lbs/MWh", wt_ba, std::stof(moer));
+	auto emissions = (m * duration * std::stof(moer)) / (3600.0 * 1000.0 * 1000.0);
+	info ("Estimated emissions for {:03.2f}J of energy consumption over {}s is: {:03.6f} lbs", m, duration, emissions);
 }
 
 

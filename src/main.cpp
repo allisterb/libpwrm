@@ -16,6 +16,7 @@
 #include <termios.h>
 #include <poll.h>
 #include <libgen.h>
+#include "date.h"
 
 #include "cpu/cpu.h"
 #include "process/process.h"
@@ -51,6 +52,8 @@
 
 #define NR_OPEN_DEF 1024 * 1024
 
+using namespace date;
+using namespace std::chrono;
 using namespace spdlog;
 using namespace TCLAP;
 namespace sp=subprocess;
@@ -387,13 +390,20 @@ std::string get_exec_dir() {
     return std::string(executableDir);
 }
 
+string get_ISO8601_current_timestamp()
+{
+    auto now = chrono::system_clock::now();
+    return date::format("%FT%TZ", date::floor<chrono::seconds>(now));
+}
+
 void report_co2_storage(std::string xjson)
 {
 	info("path is {}, {}", get_exec_dir(), get_exec_path());
 	info("Uploading power usage and emissions data...");
-	auto st= sp::Popen({"node", "co2.storage", "upload", "foo", "bar", "baz", "bash"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	auto st= sp::Popen({"node", "--no-experimental-fetch", "co2.storage", "upload", get_ISO8601_current_timestamp(), "120", "0.1", "0.2"}, sp::shell{true}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
 	st.wait();
-	info("output is {}", st.communicate().first.buf.data());
+	auto out = st.communicate();
+	info("output is {} {}", out.first.buf.data(), out.second.buf.data());
 }
 
 std::string get_wattime_login(const std::string username, const std::string password)
@@ -461,6 +471,7 @@ int main(int argc, char *argv[])
 		,true, "hw", &systems, cmdline, false);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the CO2.storage service.", cmdline, false);
+		//ValueArg<int> report_duration_arg("", "report-duration", "Report the po")
 		ValueArg<string> wt_user_arg("", "wt-user", "The WattTime API user.", false, "", "string", cmdline);
 		ValueArg<string> wt_pass_arg("", "wt-pass", "The WattTime API password.", false, "", "string", cmdline);
 		ValueArg<string> wt_ba_arg("", "wt-ba", "The WattTime API balanced authority abbreviation.", false, "", "string", cmdline);
@@ -505,7 +516,7 @@ int main(int argc, char *argv[])
 				
 				info("Measuring CPU power usage using Intel RAPL interface...");
 				while(true) {
-					cout << "\nDaemon running...press any key to exit.\n" << flush;
+					info ("Daemon running...press any key to exit.");
 					start_rapl_cpu_measurement();
 					auto p = end_rapl_cpu_measurement();
 					measurements["rapl"] = p;
@@ -523,7 +534,7 @@ int main(int argc, char *argv[])
 				detect_power_meters();
 				info("Starting daemon....");
 				while(true) {
-					cout << "\nDaemon running...press any key to exit.\n" << flush;
+					info("Daemon running...press any key to exit.");
 					start_power_measurement();
 					end_power_measurement();
 					auto p = global_power();

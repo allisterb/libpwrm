@@ -390,12 +390,11 @@ std::string get_exec_dir() {
 void report_co2_storage(std::string xjson)
 {
 	info("path is {}, {}", get_exec_dir(), get_exec_path());
-	auto st= sp::Popen({"node", "co2.storage", "--help"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	info("Uploading power usage and emissions data...");
+	auto st= sp::Popen({"node", "co2.storage", "upload", "foo", "bar", "baz", "bash"}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
 	st.wait();
 	info("output is {}", st.communicate().first.buf.data());
-
 }
-
 
 std::string get_wattime_login(const std::string username, const std::string password)
 {
@@ -476,6 +475,7 @@ int main(int argc, char *argv[])
 			info("Debug mode enabled.");
 		}
 		if (cmd.getValue() == "info") {
+			report_co2_storage("jj");
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {

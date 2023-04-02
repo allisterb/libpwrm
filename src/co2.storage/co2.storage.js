@@ -1,11 +1,12 @@
 import { FGStorage } from '@co2-storage/js-api'
 import fs from 'fs'
 import { program } from 'commander'
+import * as dotenv from 'dotenv'
+
+dotenv.config()
 
 const authType = "pk"
 const ipfsNodeType = "client"
-//const ipfsNodeAddr = "/ip4/127.0.0.1/tcp/5001"
-//const fgApiUrl = "http://localhost:3020"
 const ipfsNodeAddr = "/dns4/web2.co2.storage/tcp/5002/https"
 const fgApiUrl = "https://co2.storage"
 
@@ -18,15 +19,18 @@ program
 
 program.command('upload')
   .description('Upload a data file to CO2.Storage')
-  .argument('<string>', 'file to upload')
+  .argument('<string>', 'timestamp of reading')
+  .argument('<string>', 'duration')
+  .argument('<string>', 'power consumed in W')
+  .argument('<string>', 'emissions')
   .option('-t, --template <string>', 'The CO2.Storage template to use to upload the data.');
 
-program.parse()
+//program.parse()
 
 const assetElements = [
   {  
     "name": "RunID",
-    "value": process.env.RUN_ID
+    "value": process.env.ESTUARY_API_KEY
   },
   {
     "name": "TeamID",
@@ -69,6 +73,8 @@ const assetElements = [
     "value": process.env.ON_CLOUD
   },
 ];
+console.log(assetElements);
+process.exit();
 /**
  * Add asset
  * parameters: { options } -> (assetElements:json, asset parent:string(CID), asset name:string, asset template:string(CID),

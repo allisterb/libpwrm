@@ -601,7 +601,7 @@ int main(int argc, char *argv[])
 					info("Power usage: {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						report(devices, measurements, report_duration_arg.getValue(), &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
+						report(devices, measurements, report_duration_arg.getValue(), wt_user_arg.getValue(), wt_pass_arg.getValue(), wt_ba_arg.getValue());
 					}
 					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}

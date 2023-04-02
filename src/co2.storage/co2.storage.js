@@ -109,6 +109,7 @@ const assetElements = [
     "value": parseFloat(program.args[4])
   },
 ];
+console.log("Asset elements are:");
 console.log(assetElements);
 
 /**

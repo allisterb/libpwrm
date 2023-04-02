@@ -25,7 +25,7 @@ program.command('upload')
   .argument('<string>', 'emissions')
   .option('-t, --template <string>', 'The CO2.Storage template to use to upload the data.');
 
-//program.parse()
+program.parse()
 
 const assetElements = [
   {  
@@ -71,6 +71,10 @@ const assetElements = [
   {
     "name": "OnCloud",
     "value": process.env.ON_CLOUD
+  },
+  {
+    "name": "Timestamp",
+    "value": program.args[1]
   },
 ];
 console.log(assetElements);

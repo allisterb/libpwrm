@@ -546,7 +546,7 @@ int main(int argc, char *argv[])
 					unsigned int r = -1;
 					string name = "";
 					init_nvml();
-					measure_nv_device_power(atoi(devid_arg.getValue()->c_str()), 0, &name, &r);
+					measure_nv_device_power(atoi(devid_arg.getValue().c_str()), 0, &name, &r);
 					shutdown_nvml();
 					info("GPU Device #{}: {}.", devid_arg.getValue(), name);
 					auto p = r / 1000.0;

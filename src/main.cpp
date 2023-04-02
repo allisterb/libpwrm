@@ -536,9 +536,9 @@ int main(int argc, char *argv[])
 					if (iskeypressed( 5000 )) break;
 				}
 			}
-			#ifdef CUDAToolkit_FOUND
-			else if (*subsystem == "nv") {
-				info ("Measuring NVIDIA GPU device #{} power usage...", *devid);
+			#ifndef CUDAToolkit_FOUND
+			else if (subsystem.getValue() == "nv") {
+				info ("Measuring NVIDIA GPU device #{} power usage...", devid_arg.getValue());
 				
 				info("Starting daemon....");
 				while (true) {		
@@ -546,15 +546,15 @@ int main(int argc, char *argv[])
 					unsigned int r = -1;
 					string name = "";
 					init_nvml();
-					measure_nv_device_power(atoi(devid->c_str()), 0, &name, &r);
+					measure_nv_device_power(atoi(devid_arg.getValue()->c_str()), 0, &name, &r);
 					shutdown_nvml();
-					info("GPU Device #{}: {}.", *devid, name);
+					info("GPU Device #{}: {}.", devid_arg.getValue(), name);
 					auto p = r / 1000.0;
 					measurements[name] = p;
 					info("Power usage: {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
+						//report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
 					}
 					if (iskeypressed( 5000 )) break;
 				}

@@ -22,6 +22,53 @@ program.command('upload')
   .option('-t, --template <string>', 'The CO2.Storage template to use to upload the data.');
 
 program.parse()
+
+const assetElements = [
+  {  
+    "name": "RunID",
+    "value": process.env.RUN_ID
+  },
+  {
+    "name": "TeamID",
+    "value": process.env.TEAM_ID
+  },
+  {
+    "name": "TeamName",
+    "value": process.env.TEAM_NAME
+  },
+  {
+    "name": "ProjectID",
+    "value": process.env.PROJECT_ID
+  },
+  {
+    "name": "ProjectName",
+    "value": process.env.PROJECT_NAME
+  },
+  {
+    "name": "ExperimentID",
+    "value": process.env.EXPERIMENT_ID
+  },
+  {
+    "name": "ExperimentName",
+    "value": process.env.EXPERIMENT_NAME
+  },
+  {
+    "name": "CountryName",
+    "value": process.env.COUNTRY_NAME
+  },
+  {
+    "name": "CountryISOCode",
+    "value": process.env.COUNTRY_ISO_CODE
+  },
+  {
+    "name": "CountryRegion",
+    "value": process.env.COUNTRY_REGION
+  },
+  {
+    "name": "OnCloud",
+    "value": process.env.ON_CLOUD
+  },
+];
 /**
  * Add asset
  * parameters: { options } -> (assetElements:json, asset parent:string(CID), asset name:string, asset template:string(CID),
@@ -202,7 +249,7 @@ const assetElements = [
     }
 ]
 */
-const assetElements  = [];
+
 let addAssetResponse = await fgStorage.addAsset(
     assetElements,
     {

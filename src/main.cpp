@@ -418,7 +418,6 @@ std::string get_wt_auth_token(const std::string username, const std::string pass
 std::string get_wt_moer(const std::string wt_ba)
 {
 	httplib::Client cli("https://api2.watttime.org");
-	debug("Token is {}", wt_token);
 	cli.set_default_headers(httplib::Headers {{ "Authorization", ("Bearer " + wt_token) }, {"Accept", "*/*"}, {"User-Agent", "libpwrm"}});
 	auto res = cli.Get("/v2/index?ba=" + wt_ba);
 	if (res->status == 401)
@@ -438,29 +437,10 @@ std::string get_wt_moer(const std::string wt_ba)
 	}
 }
 
-void report(std::vector<string> devices,  std::map<string, double> measurements, int duration, const string wt_user, const string wt_pass, const string wt_ba)
-{
-	auto m = measurements.begin()->second;
-	if (wt_token.empty())
-	{
-		wt_token = get_wt_auth_token(wt_user, wt_pass);
-	}
-	auto moer = get_wt_moer(wt_ba);
-	if (moer == "refresh")
-	{
-		wt_token = get_wt_auth_token(wt_user, wt_pass);
-		moer = get_wt_moer(wt_ba);
-	}
-	info("WattTime MOER for BA {} is {:03.2f} CO2 lbs/MWh", wt_ba, std::stof(moer));
-	auto emissions = (m * duration * std::stof(moer)) / (3600.0 * 1000.0 * 1000.0);
-	info ("Estimated emissions for {:03.2f}J of energy consumption over {}s is: {:03.6f} lbs", m, duration, emissions);
-}
-
-
-void report_co2_storage(std::string timestamp, int duration, float energy, float emissions)
+void report_co2_storage(std::string timestamp, int duration, float power, float emissions)
 {
 	info("Uploading power usage and emissions data to CO2.Storage...");
-	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(energy), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(power), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
 	st.wait();
 	auto out = st.communicate();
 	auto std_out = std::string(out.first.buf.data());
@@ -478,6 +458,26 @@ void report_co2_storage(std::string timestamp, int duration, float energy, float
 		error("Did not create asset. CO2.Storage service response: {} {}.", std_out, std_err);
 	}
 }
+
+void report(std::vector<string> devices,  std::map<string, double> _measurements, int duration, const string wt_user, const string wt_pass, const string wt_ba)
+{
+	auto m = _measurements.begin()->second;
+	if (wt_token.empty())
+	{
+		wt_token = get_wt_auth_token(wt_user, wt_pass);
+	}
+	auto moer = get_wt_moer(wt_ba);
+	if (moer == "refresh")
+	{
+		wt_token = get_wt_auth_token(wt_user, wt_pass);
+		moer = get_wt_moer(wt_ba);
+	}
+	info("WattTime MOER for BA {} is {:03.2f} CO2 lbs/MWh", wt_ba, std::stof(moer));
+	auto emissions = (m * duration * std::stof(moer)) / (3600.0 * 1000.0 * 1000.0);
+	info ("Estimated emissions for {:03.2f}W of power usage over {}s is: {:03.6f} lbs", m, duration, emissions);
+	report_co2_storage(get_ISO8601_current_timestamp(), duration, m, emissions);
+}
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -521,8 +521,6 @@ int main(int argc, char *argv[])
 			info("Debug mode enabled.");
 		}
 		if (cmd.getValue() == "info") {
-			//get_wt_m
-			//report_co2_storage(get_ISO8601_current_timestamp(), 120, 0.2, 0.3);
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {

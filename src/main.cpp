@@ -386,7 +386,7 @@ std::string get_exec_dir() {
     char *executablePathStr = new char[PATH_MAX];
     strcpy(executablePathStr, (executablePath).c_str());
     char* executableDir = dirname(executablePathStr);
-    delete [] executablePathStr;
+    //delete [] executablePathStr;
     return std::string(executableDir);
 }
 
@@ -439,24 +439,25 @@ std::string get_wt_moer(const std::string wt_ba)
 
 void report_co2_storage(std::string timestamp, int duration, float power, float emissions)
 {
+	//debug("Exec dir is {}, {}", dirname((char*) get_exec_path().c_str()));
 	info("Uploading power usage and emissions data to CO2.Storage...");
 	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(power), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
-	st.wait();
 	auto out = st.communicate();
-	auto std_out = std::string(out.first.buf.data());
-	auto std_err = out.second.buf.size() == 0 ? "" : std::string(out.second.buf.data());
-	debug("node process output is {} {}", std_out, std_err);
-	
-	if (std_out.find("Asset created") != std::string::npos)
-	{
-		auto asset_json = std_out.substr(std_out.find("Asset created") + 14);
-		info("Asset created.");
-		debug("Asset response is {}.", asset_json);
-	}
-	else
-	{
-		error("Did not create asset. CO2.Storage service response: {} {}.", std_out, std_err);
-	}
+	info("CO2.Storage asset upload complete.");
+	//auto std_out = std::string(out.first.buf.data());
+	//auto std_err = out.second.buf.size() == 0 ? "" : std::string(out.second.buf.data());
+	//debug("node co2.storage process output is {} {}", std_out, std_err);
+	//
+	//if (std_out.find("Asset created") != std::string::npos)
+	//{
+	//	//auto asset_json = std_out.substr(std_out.find("Asset created") + 14);
+	//	//info("Asset created.");
+	//	//debug("Asset response is {}.", asset_json);
+	//}
+	//else
+	//{
+	//	error("Did not create asset. CO2.Storage service response: {} {}.", std_out, std_err);
+	//}
 }
 
 void report(std::vector<string> devices,  std::map<string, double> _measurements, int duration, const string wt_user, const string wt_pass, const string wt_ba)

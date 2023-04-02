@@ -71,7 +71,6 @@ set(pwrm_headers
     ${cpu_headers}
     ${nvmlpower_headers}
     src/httplib.h
-    src/reporting/reporting.h
     src/devlist.h
     src/lib.h
 )
@@ -85,7 +84,6 @@ add_library(pwrm SHARED
     ${devices_sources}
     ${cpu_sources}
     ${nvmlpower_sources}
-    src/reporting/reporting.cpp
     src/devlist.cpp
     src/json.hpp
     src/lib.cpp

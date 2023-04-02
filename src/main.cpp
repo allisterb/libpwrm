@@ -40,12 +40,11 @@
 #include "nvidia/nvml_power.h"
 #endif
 
-#include "reporting/reporting.h"
-
 #include "Figlet.hh"
 #include "tclap/CmdLine.h"
 #include "tclap/UnlabeledValueArg.h"
 #include "subprocess.hpp"
+#include "json.hpp"
 #include "httplib.h"
 
 #define DEBUGFS_MAGIC          0x64626720
@@ -396,14 +395,26 @@ string get_ISO8601_current_timestamp()
     return date::format("%FT%TZ", date::floor<chrono::seconds>(now));
 }
 
-void report_co2_storage(std::string xjson)
+void report_co2_storage(std::string timestamp, int duration, float energy, float emissions)
 {
-	info("path is {}, {}", get_exec_dir(), get_exec_path());
-	info("Uploading power usage and emissions data...");
-	auto st= sp::Popen({"node", "--no-experimental-fetch", "co2.storage", "upload", get_ISO8601_current_timestamp(), "120", "0.1", "0.2"}, sp::shell{true}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	info("Uploading power usage and emissions data to CO2.Storage...");
+	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(energy), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
 	st.wait();
 	auto out = st.communicate();
-	info("output is {} {}", out.first.buf.data(), out.second.buf.data());
+	auto std_out = std::string(out.first.buf.data());
+	auto std_err = out.second.buf.size() == 0 ? "" : std::string(out.second.buf.data());
+	debug("node process output is {} {}", std_out, std_err);
+	
+	if (std_out.find("Asset created") != std::string::npos)
+	{
+		auto asset_json = std_out.substr(std_out.find("Asset created") + 14);
+		info("Asset created.");
+		debug("Asset response is {}.", asset_json);
+	}
+	else
+	{
+		error("Did not create asset. CO2.Storage service response: {} {}.", std_out, std_err);
+	}
 }
 
 std::string get_wattime_login(const std::string username, const std::string password)
@@ -443,6 +454,12 @@ std::string get_emissions(const std::string wt_token, const std::string wt_ba)
 
 }
 
+void report(std::vector<string> devices,  std::map<string, double> measurements, int duration, const string* wt_user, const string* wt_pass, const string* wt_ba)
+{
+ 
+
+}
+
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -471,7 +488,7 @@ int main(int argc, char *argv[])
 		,true, "hw", &systems, cmdline, false);
 		ValueArg<string> devid_arg("", "devid","The device id, if any. Default is 0.",false, "0", "string", cmdline);
 		SwitchArg report_arg("r", "report","Report the power measurement data using the CO2.storage service.", cmdline, false);
-		//ValueArg<int> report_duration_arg("", "report-duration", "Report the po")
+		ValueArg<int> report_duration_arg("", "report-duration", "The time in seconds to measure power usage and emissions.", false, 60, "int", cmdline);
 		ValueArg<string> wt_user_arg("", "wt-user", "The WattTime API user.", false, "", "string", cmdline);
 		ValueArg<string> wt_pass_arg("", "wt-pass", "The WattTime API password.", false, "", "string", cmdline);
 		ValueArg<string> wt_ba_arg("", "wt-ba", "The WattTime API balanced authority abbreviation.", false, "", "string", cmdline);
@@ -486,7 +503,7 @@ int main(int argc, char *argv[])
 			info("Debug mode enabled.");
 		}
 		if (cmd.getValue() == "info") {
-			report_co2_storage("jj");
+			report_co2_storage(get_ISO8601_current_timestamp(), 120, 0.2, 0.3);
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {
@@ -497,7 +514,7 @@ int main(int argc, char *argv[])
     			for (ulong i = 0; i < all_devices.size(); i++) {
 					devices.push_back(all_devices[i]->human_name());
     			}
-				report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
+				report(devices, measurements, 0, &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
 			}
 		}
 
@@ -523,9 +540,9 @@ int main(int argc, char *argv[])
 					info("CPU Power usage {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
+						report(devices, measurements, 0, &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
 					}
-					if (iskeypressed( 5000 )) break;
+					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}
 			}
 			else if (subsystem.getValue() == "meter")
@@ -542,9 +559,9 @@ int main(int argc, char *argv[])
 					info("System power usage: {:03.2f}W", p);
 					if (report_arg.getValue())
 					{
-						report(devices, measurements, &wt_user_arg.getValue(), &wt_pass_arg.getValue());
+						report(devices, measurements, report_duration_arg.getValue(), &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
 					}
-					if (iskeypressed( 5000 )) break;
+					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}
 			}
 			#ifdef CUDAToolkit_FOUND
@@ -565,9 +582,9 @@ int main(int argc, char *argv[])
 					info("Power usage: {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						//report(&base_report_arg.getValue(), devices, measurements, &ceramic_arg.getValue(), &did_arg.getValue());
+						report(devices, measurements, report_duration_arg.getValue(), &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
 					}
-					if (iskeypressed( 5000 )) break;
+					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}
 				
 			}

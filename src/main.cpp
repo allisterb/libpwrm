@@ -415,23 +415,12 @@ std::string get_wattime_login(const std::string username, const std::string pass
 	}
 }
 
-std::string get_emissions(const std::string wt_token, const float lat, const float lon)
+std::string get_emissions(const std::string wt_token, const std::string wt_ba)
 {
 	httplib::Client cli("https://api2.watttime.org");
 	debug("Token is {}", wt_token);
-	debug("Sleeping for 2 seconds after token refresh.");
-    sleep(2);
-	//cli.set_bearer_token_auth(wt_token);
-	//cli.
-	//cli.se
 	cli.set_default_headers(httplib::Headers {{ "Authorization", ("Bearer " + wt_token) }, {"Accept", "*/*"}, {"User-Agent", "libpwrm"}});
-	auto res = cli.Get("/v2/index?ba=CAISO_NORTH");// + std::to_string(lat) + "&longitude=" + std::to_string(lon) + "&style=percent");
-	if (res->status==403)
-	{
-		debug("Sleeping for 2 seconds after token refresh.");
-		sleep(2);
-		res = cli.Get("/v2/index?ba=CAISO_NORTH");
-	}
+	auto res = cli.Get("/v2/index?ba=" + wt_ba);
 	if (res->status == 200)
 	{
 		debug("Call to WattTime index endpoint returned {}.", res->body);
@@ -475,6 +464,7 @@ int main(int argc, char *argv[])
 		SwitchArg report_arg("r", "report","Report the power measurement data using the CO2.storage service.", cmdline, false);
 		ValueArg<string> wt_user_arg("", "wt-user", "The WattTime API user.", false, "", "string", cmdline);
 		ValueArg<string> wt_pass_arg("", "wt-pass", "The WattTime API password.", false, "", "string", cmdline);
+		ValueArg<string> wt_ba_arg("", "wt-ba", "The WattTime API balanced authority abbreviation.", false, "", "string", cmdline);
 		SwitchArg debug_arg("d","debug","Enable debug logging.", cmdline, false);
 		
 		cmdline.parse(argc, argv);
@@ -485,11 +475,6 @@ int main(int argc, char *argv[])
 			spdlog::set_level(spdlog::level::debug);
 			info("Debug mode enabled.");
 		}
-		auto t = get_wattime_login(wt_user_arg.getValue(), wt_pass_arg.getValue());
-		info("WattTime API token is {}", t);
-		auto ind = get_emissions(t, 42.372, -72.519);
-		info("WattTime emissions is {}.", ind);
-		exit(0);
 		if (cmd.getValue() == "info") {
 			get_info(subsystem.getValue());
 		}

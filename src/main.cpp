@@ -62,6 +62,7 @@ bool debug_enabled = false;
 int debug_learning = 0;
 bool is_root = false;
 std::map<string, double> measurements;
+
  // scheme + host
 
 extern "C" {
@@ -395,6 +396,60 @@ string get_ISO8601_current_timestamp()
     return date::format("%FT%TZ", date::floor<chrono::seconds>(now));
 }
 
+std::string get_wt_auth_token(const std::string username, const std::string password)
+{
+	info("Refreshing WattTime auth token...");
+	httplib::Client cli("https://api2.watttime.org");
+	cli.set_basic_auth(username, password);
+	auto res = cli.Get("/v2/login");
+	if (res->status == 200)
+	{
+		json data = json::parse(res->body);
+		debug("WattTime API returned token: {}", data["token"].dump());
+		return data["token"].get<std::string>();
+	} 
+	else
+	{
+		error("Call to refresh WattTime auth token at https://api2.watttime.org/v2/login did not succeed. HTTP status code: {}.", res->status);
+		return "";
+	}
+}
+
+std::string get_wt_moer(std::string wt_token, const std::string wt_ba)
+{
+	httplib::Client cli("https://api2.watttime.org");
+	debug("Token is {}", wt_token);
+	cli.set_default_headers(httplib::Headers {{ "Authorization", ("Bearer " + wt_token) }, {"Accept", "*/*"}, {"User-Agent", "libpwrm"}});
+	auto res = cli.Get("/v2/index?ba=" + wt_ba);
+	if (res->status == 401)
+	{
+		return "refresh";
+	}
+	else if (res->status == 200)
+	{
+		debug("Call to WattTime index endpoint returned {}.", res->body);
+		return res->body;
+	} 
+	else
+	{
+		error("Call to WattTime index endpoint at https://api2.watttime.org/v2/index did not succeed. HTTP status code: {}.", res->status);
+		return "";
+	}
+}
+
+void report(std::vector<string> devices,  std::map<string, double> measurements, int duration, const string wt_user, const string wt_pass, const string wt_ba)
+{
+	std::string wt_token = get_wt_auth_token(wt_user, wt_pass);
+	auto moer = get_wt_moer(wt_token, wt_ba);
+	if (moer == "refresh")
+	{
+		wt_token = get_wt_auth_token(wt_user, wt_pass);
+		moer = get_wt_moer(wt_token, wt_ba);
+	}
+	info("moer {}", moer);
+}
+
+
 void report_co2_storage(std::string timestamp, int duration, float energy, float emissions)
 {
 	info("Uploading power usage and emissions data to CO2.Storage...");
@@ -416,50 +471,6 @@ void report_co2_storage(std::string timestamp, int duration, float energy, float
 		error("Did not create asset. CO2.Storage service response: {} {}.", std_out, std_err);
 	}
 }
-
-std::string get_wattime_login(const std::string username, const std::string password)
-{
-	httplib::Client cli("https://api2.watttime.org");
-	cli.set_basic_auth(username, password);
-	auto res = cli.Get("/v2/login");
-	if (res->status == 200)
-	{
-		json data = json::parse(res->body);
-		debug("WattTime API returned token: {}", data["token"].dump());
-		return data["token"].get<std::string>();
-	} 
-	else
-	{
-		error("Call to refresh WattTime auth token at https://api2.watttime.org/v2/login did not succeed. HTTP status code: {}.", res->status);
-		return "";
-	}
-}
-
-std::string get_emissions(const std::string wt_token, const std::string wt_ba)
-{
-	httplib::Client cli("https://api2.watttime.org");
-	debug("Token is {}", wt_token);
-	cli.set_default_headers(httplib::Headers {{ "Authorization", ("Bearer " + wt_token) }, {"Accept", "*/*"}, {"User-Agent", "libpwrm"}});
-	auto res = cli.Get("/v2/index?ba=" + wt_ba);
-	if (res->status == 200)
-	{
-		debug("Call to WattTime index endpoint returned {}.", res->body);
-		return res->body;
-	} 
-	else
-	{
-		error("Call to WattTime index endpoint at https://api2.watttime.org/v2/index did not succeed. HTTP status code: {}.", res->status);
-		return "";
-	}
-
-}
-
-void report(std::vector<string> devices,  std::map<string, double> measurements, int duration, const string* wt_user, const string* wt_pass, const string* wt_ba)
-{
- 
-
-}
-
 int main(int argc, char *argv[])
 {
 	setlocale (LC_ALL, "");
@@ -503,7 +514,8 @@ int main(int argc, char *argv[])
 			info("Debug mode enabled.");
 		}
 		if (cmd.getValue() == "info") {
-			report_co2_storage(get_ISO8601_current_timestamp(), 120, 0.2, 0.3);
+			//get_wt_m
+			//report_co2_storage(get_ISO8601_current_timestamp(), 120, 0.2, 0.3);
 			get_info(subsystem.getValue());
 		}
 		else if (cmd.getValue() == "measure") {
@@ -514,7 +526,7 @@ int main(int argc, char *argv[])
     			for (ulong i = 0; i < all_devices.size(); i++) {
 					devices.push_back(all_devices[i]->human_name());
     			}
-				report(devices, measurements, 0, &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
+				report(devices, measurements, 0, wt_user_arg.getValue(), wt_pass_arg.getValue(), wt_ba_arg.getValue());
 			}
 		}
 
@@ -540,7 +552,7 @@ int main(int argc, char *argv[])
 					info("CPU Power usage {:03.2f}W.", p);
 					if (report_arg.getValue())
 					{
-						report(devices, measurements, 0, &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
+						report(devices, measurements, 0, wt_user_arg.getValue(), wt_pass_arg.getValue(), wt_ba_arg.getValue());
 					}
 					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}
@@ -559,7 +571,7 @@ int main(int argc, char *argv[])
 					info("System power usage: {:03.2f}W", p);
 					if (report_arg.getValue())
 					{
-						report(devices, measurements, report_duration_arg.getValue(), &wt_user_arg.getValue(), &wt_pass_arg.getValue(), &wt_ba_arg.getValue());
+						report(devices, measurements, report_duration_arg.getValue(), wt_user_arg.getValue(), wt_pass_arg.getValue(), wt_ba_arg.getValue());
 					}
 					if (iskeypressed(report_duration_arg.getValue() * 1000)) break;
 				}

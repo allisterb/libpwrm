@@ -536,7 +536,7 @@ int main(int argc, char *argv[])
 					if (iskeypressed( 5000 )) break;
 				}
 			}
-			#ifndef CUDAToolkit_FOUND
+			#ifdef CUDAToolkit_FOUND
 			else if (subsystem.getValue() == "nv") {
 				info ("Measuring NVIDIA GPU device #{} power usage...", devid_arg.getValue());
 				

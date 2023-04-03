@@ -437,11 +437,11 @@ std::string get_wt_moer(const std::string wt_ba)
 	}
 }
 
-void report_co2_storage(std::string timestamp, int duration, double power, double emissions)
+void report_co2_storage(std::string timestamp, int duration, double energy, double emissions)
 {
 	//debug("Exec dir is {}, {}", dirname((char*) get_exec_path().c_str()));
 	info("Uploading power usage and emissions data to CO2.Storage...");
-	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(power), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
+	auto st= sp::Popen({"node", "co2.storage", "upload", timestamp, std::to_string(duration), std::to_string(energy), std::to_string(emissions)}, sp::cwd{(get_exec_dir() + "/../src/co2.storage").c_str()});
 	auto out = st.communicate();
 	info("CO2.Storage asset upload complete.");
 	//auto std_out = std::string(out.first.buf.data());
@@ -477,8 +477,8 @@ void report(std::vector<string> devices,  std::map<string, double> _measurements
 	info("WattTime MOER for BA {} is {:03.2f} CO2 lbs/MWh", wt_ba, std::stof(moer));
 	auto emissions = (m * duration * std::stof(moer)) / (3600.0 * 1000.0 * 1000.0);
 	info ("Estimated emissions for {:03.2f}W of power usage over {}s is: {:03.9f} lbs", m, duration, emissions);
-	debug("Timestamp: {}, Duration:{}s, Power consumed: {:03.2f}MW,  Emissions: {:03.9f} lbs.",ts, duration, (m / (1000.0 * 1000.0)), emissions);
-	report_co2_storage(ts, duration, (m / (1000.0 * 1000.0)), emissions);
+	debug("Timestamp: {}, Duration:{}s, Power usage: {:03.9f}MW,  Emissions: {:03.9f} lbs.",ts, duration, (m / (1000.0 * 1000.0)), emissions);
+	report_co2_storage(ts, duration, duration * (m / (1000.0 * 1000.0 * 3600)), emissions);
 }
 
 int main(int argc, char *argv[])

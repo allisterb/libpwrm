@@ -437,7 +437,7 @@ std::string get_wt_moer(const std::string wt_ba)
 	}
 }
 
-void report_co2_storage(std::string timestamp, int duration, float power, float emissions)
+void report_co2_storage(std::string timestamp, int duration, double power, double emissions)
 {
 	//debug("Exec dir is {}, {}", dirname((char*) get_exec_path().c_str()));
 	info("Uploading power usage and emissions data to CO2.Storage...");

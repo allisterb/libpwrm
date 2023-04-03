@@ -20,8 +20,8 @@ program
 program.command('upload')
   .description('Upload a data file to CO2.Storage')
   .argument('<string>', 'timestamp of reading')
-  .argument('<string>', 'duration')
-  .argument('<string>', 'power consumed in W')
+  .argument('<string>', 'duration in s')
+  .argument('<string>', 'power consumed in MW')
   .argument('<string>', 'emissions')
   .option('-t, --template <string>', 'The CO2.Storage template to use to upload the data.');
 

@@ -478,7 +478,7 @@ void report(std::vector<string> devices,  std::map<string, double> _measurements
 	auto emissions = (m * duration * std::stof(moer)) / (3600.0 * 1000.0 * 1000.0);
 	info ("Estimated emissions for {:03.2f}W of power usage over {}s is: {:03.9f} lbs", m, duration, emissions);
 	debug("Timestamp: {}, Duration:{}s, Power usage: {:03.9f}MW,  Emissions: {:03.9f} lbs.",ts, duration, (m / (1000.0 * 1000.0)), emissions);
-	report_co2_storage(ts, duration, duration * (m / (1000.0 * 1000.0 * 3600)), emissions);
+	report_co2_storage(ts, duration, (duration / 3600) * m, emissions);
 }
 
 int main(int argc, char *argv[])

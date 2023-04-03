@@ -101,11 +101,11 @@ const assetElements = [
     "value": parseInt(program.args[2])
   },
   {
-    "name": "Emissions",
+    "name": "EnergyConsumed",
     "value": parseFloat(program.args[3])
   },
   {
-    "name": "EnergyConsumed",
+    "name": "Emissions",
     "value": parseFloat(program.args[4])
   },
 ];
